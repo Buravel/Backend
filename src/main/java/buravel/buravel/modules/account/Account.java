@@ -20,7 +20,6 @@ public class Account {
     @Column(name = "account_id")
     private Long id;
 
-    @Column(nullable = false)
     private String username;
 
     @JsonIgnore
