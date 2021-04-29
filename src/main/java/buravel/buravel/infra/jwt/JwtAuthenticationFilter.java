@@ -45,7 +45,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //todo
+
         Account user = accountRepository.findByEmail(accountDto.getEmail());
         if (user == null) {
             throw new UsernameNotFoundException(accountDto.getEmail());
@@ -74,5 +74,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .withClaim("username", account.getUsername())
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET));
         response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX + jwtToken);
+        response.addHeader("username", account.getUsername());
     }
 }

@@ -25,6 +25,7 @@ public class AccountController {
      * {
      *     "username":"~"을 담아서 항상 보내줘야함
      * }
+     * 토큰헤더와 username헤더가  둘 다 있으니 프론트에선 username헤더 값도 저장해놓고 모든 요청보낼 때 위처럼 추가해주기
      * 백엔드에서도 테스트할 때 항상 포함해줘야함
      * */
     private final AccountRepository accountRepository;
