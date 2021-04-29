@@ -45,9 +45,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Account user = accountRepository.findByUsername(accountDto.getUsername());
+        //todo
+        Account user = accountRepository.findByEmail(accountDto.getEmail());
         if (user == null) {
-            throw new UsernameNotFoundException(accountDto.getUsername());
+            throw new UsernameNotFoundException(accountDto.getEmail());
         }
 
         // 유저네임 패스워드 토큰생성 // != jwt토큰  // 유저정보를 담기위한 토큰
