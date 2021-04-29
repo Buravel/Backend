@@ -22,10 +22,10 @@ public class HtmlEmailService implements EmailService {
     public void sendEmail(EmailMessage emailMessage) {
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {
-            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");// 이메일에 첨부파일을 넣지 않을거기때문에 false로
             mimeMessageHelper.setTo(emailMessage.getTo());
             mimeMessageHelper.setSubject(emailMessage.getSubject());
-            mimeMessageHelper.setText(emailMessage.getMessage());
+            mimeMessageHelper.setText(emailMessage.getMessage(), true);
             javaMailSender.send(mimeMessage);
             log.info("sent email : "+emailMessage.getMessage());
         } catch (MessagingException e) {
