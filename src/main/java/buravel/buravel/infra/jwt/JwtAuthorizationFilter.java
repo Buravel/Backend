@@ -45,6 +45,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         String username = JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(token)
                 .getClaim("username").asString();
 
+        //todo email로 찾기로 변경하기
+
         if (username != null) {
             Account account = accountRepository.findByUsername(username);
             UserAccount userAccount = new UserAccount(account);
