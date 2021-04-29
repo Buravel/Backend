@@ -33,11 +33,11 @@ public class AccountController {
         return ResponseEntity.ok().build();
     }
 
-    /*@GetMapping("/hello")
+    @GetMapping("/hello")
     public String hello(@CurrentUser Account account) {
         if (account == null) {
             throw new AccessDeniedException("권한없음");
         }
         return account.getUsername()+"님 안녕하세요~";
-    }*/
+    }
 }

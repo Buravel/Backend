@@ -4,8 +4,10 @@ import buravel.buravel.infra.jwt.JwtAuthenticationFilter;
 import buravel.buravel.infra.jwt.JwtAuthorizationFilter;
 import buravel.buravel.modules.account.AccountRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -34,8 +36,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilter(new JwtAuthenticationFilter(authenticationManager(), accountRepository))
                 .addFilter(new JwtAuthorizationFilter(authenticationManager(), accountRepository))
                 .authorizeRequests()
-                .mvcMatchers("/signUp", "/login","/","/tempPassword").permitAll()
+                .mvcMatchers("/signUp", "/login","/","/tempPassword","/hello").permitAll()
                 .anyRequest().authenticated();
 
+    }
+
+    @Override
+    public void configure(WebSecurity web) throws Exception
+    {
+        web.ignoring()
+                .mvcMatchers("/favicon.ico","/resources/**","/error")
+                .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
 }

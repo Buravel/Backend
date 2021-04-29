@@ -14,8 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+
 
 @Async
 @Slf4j
@@ -25,7 +24,6 @@ import java.nio.charset.StandardCharsets;
 public class AccountEventListener {
     private final EmailService emailService;
     private final TemplateEngine templateEngine;
-    private final AppProperties appProperties;
 
     @EventListener
     public void handleAccountEvent(TempPasswordEvent event) {
