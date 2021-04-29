@@ -1,29 +1,63 @@
 package buravel.buravel.modules.account;
 
+import buravel.buravel.modules.account.validator.SignUpFormValidator;
+import buravel.buravel.modules.errors.ErrorResource;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 
-/** 테스트용 컨트롤러 */
+
+
 @RestController
 @RequiredArgsConstructor
 public class AccountController {
 
+    /**
+     * ★★★ jwt를 사용하기 때문에 프론트에서 모든요청에서
+     * {
+     *     "username":"~"을 담아서 항상 보내줘야함
+     * }
+     * 백엔드에서도 테스트할 때 항상 포함해줘야함
+     * */
     private final AccountRepository accountRepository;
-    private final ModelMapper modelMapper;
-    private final PasswordEncoder passwordEncoder;
     private final AccountService accountService;
+    private final SignUpFormValidator validator;
 
     @PostMapping("/signUp")
-    public String join(@RequestBody AccountDto accountDto) {
-        Account account = modelMapper.map(accountDto, Account.class);
-        account.setPassword(passwordEncoder.encode(account.getPassword()));
-        Account save = accountRepository.save(account);
-        return save.getUsername() + save.getPassword() + " 회원가입완료";
+    public ResponseEntity signUp(@RequestBody @Valid AccountDto accountDto, Errors errors) {
+        if (errors.hasErrors()) {
+            EntityModel<Errors> jsr303error = ErrorResource.modelOf(errors);
+            return ResponseEntity.badRequest().body(jsr303error);
+        }
+        validator.validate(accountDto, errors);
+        if (errors.hasErrors()) {
+            EntityModel<Errors> customError = ErrorResource.modelOf(errors);
+            return ResponseEntity.badRequest().body(customError);
+        }
+        Account account = accountService.processNewAccount(accountDto);
+        EntityModel<Account> accountResource = AccountResource.modelOf(account);
+        return ResponseEntity.ok(accountResource);
+    }
+
+    @GetMapping("/emailVerification")
+    public ResponseEntity emailVerification(@RequestParam String token, @RequestParam String email) {
+        Account account = accountRepository.findByEmail(email);
+        if (account == null) {
+            throw new UsernameNotFoundException(account.getUsername());
+        }
+        if (!account.isValidToken(token)) {
+            return ResponseEntity.badRequest().build();
+        }
+        accountService.completeSignUp(account);
+        return ResponseEntity.ok().build();
     }
 
 
