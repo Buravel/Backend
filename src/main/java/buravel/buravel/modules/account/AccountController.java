@@ -1,10 +1,13 @@
 package buravel.buravel.modules.account;
 
+import buravel.buravel.modules.errors.ErrorResource;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -17,13 +20,31 @@ public class AccountController {
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
     private final AccountService accountService;
+    private final SignUpValidator signUpValidator;
 
     @PostMapping("/signUp")
-    public String join(@RequestBody AccountDto accountDto) {
+    public ResponseEntity signUp(@RequestBody AccountDto accountDto, Errors errors) {
+        
+        if(errors.hasErrors()){
+            EntityModel<Errors> error = ErrorResource.modelOf(errors);
+            return ResponseEntity.badRequest().body(error);
+        } // error check
+
+        // 중복 email or 잘못된 형식 검사
+        signUpValidator.validate(accountDto, errors);
+        if(errors.hasErrors()){
+            EntityModel<Errors> error = ErrorResource.modelOf(errors);
+            return ResponseEntity.badRequest().body(error);
+        } // service로 빼는게 나은가?
+
+        // 문제x 회원정보 저장
         Account account = modelMapper.map(accountDto, Account.class);
-        account.setPassword(passwordEncoder.encode(account.getPassword()));
-        Account save = accountRepository.save(account);
-        return save.getUsername() + save.getPassword() + " 회원가입완료";
+        Account saved = accountService.createAccount(account);
+
+        // email 인증 메일 발송
+        accountService.sendEmailValid(saved.getEmail());
+
+        return ResponseEntity.ok().build(); // todo: hateos 만족하는 정보 보내기
     }
 
 
