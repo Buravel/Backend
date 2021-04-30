@@ -63,8 +63,8 @@ public class AccountController {
 
 
     @PostMapping("/tempPassword")
-    public ResponseEntity sendTempPassword(@RequestBody AccountDto accountDto) {
-        accountService.sendTempPassword(accountDto.getEmail());
+    public ResponseEntity sendTempPassword(@RequestParam String email) {
+        accountService.sendTempPassword(email);
         return ResponseEntity.ok().build();
     }
 
