@@ -4,6 +4,7 @@ import buravel.buravel.modules.account.Account;
 import buravel.buravel.modules.account.AccountRepository;
 import buravel.buravel.modules.account.UserAccount;
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -42,7 +43,9 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         //그게아니면
         String token = request.getHeader(JwtProperties.HEADER_STRING).replace(JwtProperties.TOKEN_PREFIX, "");
 
-        String username = JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(token).getClaim("username").asString();
+        JWTVerifier build = JWT.require(Algorithm.HMAC256(JwtProperties.SECRET)).build();
+
+        String username = build.verify(token).getClaim("username").asString();
 
 
         if (username != null) {
