@@ -44,7 +44,7 @@ public class AccountController {
         // email 인증 메일 발송
         accountService.sendEmailValid(saved.getEmail());
 
-        return ResponseEntity.ok().build(); // todo: hateos 만족하는 정보 보내기
+        return ResponseEntity.ok().body(AccountResource.modelOf(account));
     }
 
 
