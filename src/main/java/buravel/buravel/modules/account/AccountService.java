@@ -73,7 +73,7 @@ public class AccountService implements UserDetailsService {
     // verify email
     private void sendSignUpConfirmEmail(Account account) {
         Context context = new Context(); // model에 내용담아주듯이
-        context.setVariable("link", "/emailVerification?token=" + account.getEmailCheckToken() +"&" +"email=" + account.getEmail());
+        context.setVariable("link", "/emailVerification?token=" + account.getEmailCheckToken() +"&" +"email=" + account.getEmail()+"&username="+account.getUsername());
         context.setVariable("username", account.getUsername());
         context.setVariable("linkName", "이메일 인증하기");
         context.setVariable("message","Buravel 서비스 사용을 위해 링크를 클릭해주세요");
