@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -89,6 +90,19 @@ public class AccountService implements UserDetailsService {
     }
 
     public void completeSignUp(Account account) {
-        account.completeSignUp();
+        Optional<Account> byId = accountRepository.findById(account.getId());
+        Account find = byId.get();
+        if (find != null) {
+            find.completeSignUp();
+        } else {
+            throw new UsernameNotFoundException(account.getUsername());
+        }
+    }
+
+    public void reSendEmailCheckToken(Account account) {
+        Account ac = accountRepository.findById(account.getId()).get();
+        ac.generateEmailCheckToken();
+        Account saved = accountRepository.save(ac);
+        sendSignUpConfirmEmail(saved);
     }
 }
