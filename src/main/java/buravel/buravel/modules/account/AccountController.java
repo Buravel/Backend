@@ -47,6 +47,12 @@ public class AccountController {
         return ResponseEntity.ok().build();
     }
 
+    //generate new emailCheckToken & re-send token
+    @PostMapping("/emailCheckToken")
+    public ResponseEntity re_emailVerification(@CurrentUser Account account) {
+        accountService.reSendEmailCheckToken(account);
+        return ResponseEntity.ok().build();
+    }
 
     @PostMapping("/tempPassword")
     public ResponseEntity sendTempPassword(@RequestParam String email) {
