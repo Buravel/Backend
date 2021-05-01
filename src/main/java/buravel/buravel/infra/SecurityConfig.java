@@ -19,7 +19,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final AccountRepository accountRepository;
-    private final PasswordEncoder passwordEncoder;
     private final CorsConfig corsConfig;
 
 
