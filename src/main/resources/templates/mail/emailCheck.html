@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Buravel Email Check</title>
+</head>
+<body>
+    <h2>Buravel 인증 메일</h2><br>
+    안녕하세요. <h1 th:text="${username}"></h1>님. <br>
+    이메일 인증을 완료하시려면 <a th:href="${host + link}">인증</a> 을 클릭해주세요.
+
+    감사합니다.
+</body>
+</html>

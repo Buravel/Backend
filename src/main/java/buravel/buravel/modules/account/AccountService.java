@@ -1,8 +1,12 @@
 package buravel.buravel.modules.account;
 
+import buravel.buravel.infra.AppProperties;
+import buravel.buravel.infra.mail.EmailMessage;
+import buravel.buravel.infra.mail.EmailService;
 import buravel.buravel.modules.account.event.TempPasswordEvent;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -13,6 +17,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.Errors;
+import org.thymeleaf.ITemplateEngine;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import java.util.UUID;
 
@@ -22,8 +29,12 @@ import java.util.UUID;
 public class AccountService implements UserDetailsService {
 
     private final AccountRepository accountRepository;
+    private final AppProperties appProperties;
     private final ApplicationEventPublisher publisher;
     private final PasswordEncoder passwordEncoder;
+    private final ModelMapper modelMapper;
+    private final TemplateEngine templateEngine;
+    private final EmailService emailService;
     //private final SignUpValidator signUpValidator;
 
     @Override
@@ -70,7 +81,48 @@ public class AccountService implements UserDetailsService {
         return accountRepository.save(account);
     }
 
-    public void sendEmailValid(String email){
+    public Account signUp(AccountDto accountDto){
+        Account account = modelMapper.map(accountDto, Account.class);
+        Account saved = createAccount(account);
 
+        // email 인증 메일 발송
+        sendConfirmEmail(saved);
+
+        return saved;
+    }
+
+    public void sendConfirmEmail(Account account){
+        Context context = new Context();
+
+        // mail에 담을 link 생성
+        context.setVariable("link", "/emailCheck?token=" + account.getEmailCheckToken()
+                                + "&email=" + account.getEmail());
+        context.setVariable("username", account.getUsername());
+        context.setVariable("host", appProperties.getHost());
+
+        // 임시 mail html에 변수 전달
+        String message = templateEngine.process("mail/emailCheck", context);
+
+        EmailMessage emailMessage = EmailMessage.builder()
+                .to(account.getEmail())
+                .subject("Bravel 인증 메일 입니다.")
+                .message(message).build();
+
+        emailService.sendEmail(emailMessage);
+    }
+
+    public boolean emailCheck(String token, String email){
+        Account account = accountRepository.findByEmail(email);
+
+        if(account == null){
+            throw new UsernameNotFoundException(email);
+        }
+
+        if(!account.getEmailCheckToken().equals(token)){
+            return false;
+        }
+
+        account.setEmailVerified(true);
+        return true;
     }
 }

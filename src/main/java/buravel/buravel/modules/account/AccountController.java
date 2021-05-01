@@ -37,15 +37,21 @@ public class AccountController {
             return ResponseEntity.badRequest().body(error);
         } // service로 빼는게 나은가?
 
-        // 문제x 회원정보 저장
-        Account account = modelMapper.map(accountDto, Account.class);
-        Account saved = accountService.createAccount(account);
-
-        // email 인증 메일 발송
-        accountService.sendEmailValid(saved.getEmail());
+        // 회원가입
+        Account account = accountService.signUp(accountDto);
 
         return ResponseEntity.ok().body(AccountResource.modelOf(account));
     }
+
+    @GetMapping("/emailCheck")
+    public ResponseEntity emailCheck(@RequestParam String token, @RequestParam String email){
+        if(!accountService.emailCheck(token, email)){
+            return ResponseEntity.badRequest().build();
+        }
+
+        return ResponseEntity.ok().build();
+    }
+
 
 
     @PostMapping("/tempPassword")
