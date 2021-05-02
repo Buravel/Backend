@@ -4,6 +4,8 @@ import buravel.buravel.modules.account.Account;
 import buravel.buravel.modules.bookmarkPost.BookmarkPost;
 import buravel.buravel.modules.plan.Plan;
 import buravel.buravel.modules.postTag.PostTag;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
 
 import javax.persistence.*;
@@ -16,6 +18,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(of = "id")
 public class Post {
     @Id
     @GeneratedValue
