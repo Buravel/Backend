@@ -105,4 +105,12 @@ public class AccountService implements UserDetailsService {
         Account saved = accountRepository.save(ac);
         sendSignUpConfirmEmail(saved);
     }
+
+    public Account findById(Long id) {
+        return accountRepository.findById(id).get();
+    }
+
+    public Account findByEmail(String email) {
+        return accountRepository.findByEmail(email);
+    }
 }

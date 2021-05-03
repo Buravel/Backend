@@ -2,8 +2,10 @@ package buravel.buravel.modules.plan;
 
 import buravel.buravel.modules.account.Account;
 import buravel.buravel.modules.account.AccountRepository;
+import buravel.buravel.modules.account.AccountResponseDto;
 import buravel.buravel.modules.planTag.PlanTag;
 import buravel.buravel.modules.planTag.PlanTagRepository;
+import buravel.buravel.modules.planTag.PlanTagResponseDto;
 import buravel.buravel.modules.post.Post;
 import buravel.buravel.modules.post.PostCategory;
 import buravel.buravel.modules.post.PostDto;
@@ -17,6 +19,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -27,6 +31,7 @@ public class PlanService {
     private final TagRepository tagRepository;
     private final PlanTagRepository planTagRepository;
     private final PostTagRepository postTagRepository;
+    private final ModelMapper modelMapper;
 
     public Plan createPlan(PlanDto planDto, Account account) {
         Account user = accountRepository.findById(account.getId()).get();
@@ -139,7 +144,7 @@ public class PlanService {
             return price + "원";
         }
         String string = price.toString();
-        string = string.substring(string.length() - 4, string.length());
+        string = string.substring(0, string.length()-4);
         return string+"만원";
         // 40000 = 4/0000 = 4만원
     }
@@ -176,6 +181,28 @@ public class PlanService {
             //양방향
             plan.getPlanTagList().add(made);
         }
+    }
+
+    public PlanResponseDto createPlanResponse(Account account, Plan plan) {
+        PlanResponseDto planResponseDto = modelMapper.map(plan, PlanResponseDto.class);
+        AccountResponseDto accountResponseDto = createAccountResponseDto(account);
+        planResponseDto.setAccountResponseDto(accountResponseDto);
+        List<PlanTag> list = plan.getPlanTagList();
+        for (PlanTag planTag : list) {
+            PlanTagResponseDto planTagResponseDto = createPlanTagResponseDto(planTag);
+            planResponseDto.getPlanTagResponseDtos().add(planTagResponseDto);
+        }
+        return planResponseDto;
+    }
+
+    private AccountResponseDto createAccountResponseDto(Account account) {
+        return modelMapper.map(account,AccountResponseDto.class);
+    }
+
+    private PlanTagResponseDto createPlanTagResponseDto(PlanTag planTag) {
+        PlanTagResponseDto planTagResponseDto = new PlanTagResponseDto();
+        planTagResponseDto.setPlanTagTitle(planTag.getTag().getTagTitle());
+        return planTagResponseDto;
     }
 }
 

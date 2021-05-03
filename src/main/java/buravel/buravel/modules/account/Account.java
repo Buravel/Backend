@@ -39,15 +39,16 @@ public class Account {
 
     private boolean emailVerified;
 
+    @JsonIgnore
     private String emailCheckToken;
 
-    private LocalDateTime emailCheckTokenGeneratedAt;
+    //private LocalDateTime emailCheckTokenGeneratedAt;
 
     public void generateEmailCheckToken() {
         String uuid = UUID.randomUUID().toString().replaceAll("-", "");
         uuid = uuid.substring(0, 10);
         this.emailCheckToken = uuid;
-        this.emailCheckTokenGeneratedAt = LocalDateTime.now();
+        //this.emailCheckTokenGeneratedAt = LocalDateTime.now();
     }
 
     public boolean isValidToken(String token) {

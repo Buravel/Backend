@@ -22,6 +22,7 @@ import java.util.List;
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
 public class Plan {
+    //todo 나머지 가격들 set구현
     @Id
     @GeneratedValue
     @Column(name = "plan_id")
