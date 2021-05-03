@@ -8,6 +8,7 @@ import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -27,12 +28,12 @@ import java.util.UUID;
 public class AccountService implements UserDetailsService {
 
     private final AccountRepository accountRepository;
+    private final AppProperties appProperties;
     private final ApplicationEventPublisher publisher;
     private final PasswordEncoder passwordEncoder;
-    private final ModelMapper modelMapper;
     private final EmailService emailService;
-    private final AppProperties appProperties;
     private final TemplateEngine templateEngine;
+    private final ModelMapper modelMapper;
 
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
@@ -106,11 +107,39 @@ public class AccountService implements UserDetailsService {
         sendSignUpConfirmEmail(saved);
     }
 
+<<<<<<< HEAD
     public Account findById(Long id) {
         return accountRepository.findById(id).get();
     }
 
     public Account findByEmail(String email) {
         return accountRepository.findByEmail(email);
+=======
+    public boolean sendUsername(String email){
+        Account account = accountRepository.findByEmail(email);
+
+        if(account == null){
+            throw new UsernameNotFoundException(email);
+        } // no such email user
+
+        if(!account.isEmailVerified()){
+            return false;
+        } // not verified user
+
+        Context context = new Context();
+        context.setVariable("username", account.getUsername());
+        context.setVariable("host", appProperties.getHost());
+
+        String message = templateEngine.process("mail/sendUsername", context);
+
+        EmailMessage build = EmailMessage.builder()
+                .to(account.getEmail())
+                .subject("Buravel 아이디 찾기")
+                .message(message)
+                .build();
+
+        emailService.sendEmail(build);
+        return true;
+>>>>>>> 4915ceea6e179560adf05c7ff110d5742591323d
     }
 }
