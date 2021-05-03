@@ -1,8 +1,13 @@
 package buravel.buravel.modules.account;
 
-import buravel.buravel.modules.account.validator.SignUpFormValidator;
 import buravel.buravel.modules.errors.ErrorResource;
 import lombok.RequiredArgsConstructor;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import buravel.buravel.modules.account.validator.SignUpFormValidator;
+import buravel.buravel.modules.errors.ErrorResource;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -11,8 +16,6 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-
-
 
 @RestController
 @RequiredArgsConstructor
@@ -60,6 +63,14 @@ public class AccountController {
     @PostMapping("/tempPassword")
     public ResponseEntity sendTempPassword(@RequestParam String email) {
         accountService.sendTempPassword(email);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/findUsername")
+    public ResponseEntity sendUsername(@RequestParam String email){
+        if(!accountService.sendUsername(email))
+            return ResponseEntity.badRequest().build();
+
         return ResponseEntity.ok().build();
     }
 
