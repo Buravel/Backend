@@ -33,6 +33,7 @@ public class PlanService {
     private final PostTagRepository postTagRepository;
     private final ModelMapper modelMapper;
 
+
     public Plan createPlan(PlanDto planDto, Account account) {
         Account user = accountRepository.findById(account.getId()).get();
 
@@ -204,5 +205,7 @@ public class PlanService {
         planTagResponseDto.setPlanTagTitle(planTag.getTag().getTagTitle());
         return planTagResponseDto;
     }
+
 }
 
+  

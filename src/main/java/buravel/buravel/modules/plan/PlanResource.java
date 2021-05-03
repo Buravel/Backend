@@ -6,6 +6,7 @@ import org.springframework.hateoas.EntityModel;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+
 public class PlanResource extends EntityModel<PlanResponseDto> {
     public static EntityModel<PlanResponseDto> modelOf(PlanResponseDto planResponseDto) {
         EntityModel<PlanResponseDto> planResource = EntityModel.of(planResponseDto);
