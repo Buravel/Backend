@@ -107,7 +107,6 @@ public class AccountService implements UserDetailsService {
         sendSignUpConfirmEmail(saved);
     }
 
-
     public Account findById(Long id) {
         return accountRepository.findById(id).get();
     }
@@ -115,6 +114,7 @@ public class AccountService implements UserDetailsService {
     public Account findByEmail(String email) {
         return accountRepository.findByEmail(email);
     }
+
 
     public boolean sendUsername(String email){
         Account account = accountRepository.findByEmail(email);
