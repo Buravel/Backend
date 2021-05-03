@@ -107,14 +107,15 @@ public class AccountService implements UserDetailsService {
         sendSignUpConfirmEmail(saved);
     }
 
-<<<<<<< HEAD
+
     public Account findById(Long id) {
         return accountRepository.findById(id).get();
     }
 
     public Account findByEmail(String email) {
         return accountRepository.findByEmail(email);
-=======
+    }
+
     public boolean sendUsername(String email){
         Account account = accountRepository.findByEmail(email);
 
@@ -140,6 +141,5 @@ public class AccountService implements UserDetailsService {
 
         emailService.sendEmail(build);
         return true;
->>>>>>> 4915ceea6e179560adf05c7ff110d5742591323d
     }
 }
