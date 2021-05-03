@@ -14,5 +14,6 @@ public class AccountResource extends EntityModel<Account> {
         accountResource.add(linkTo(methodOn(IndexController.class).index()).withRel("index"));
         return accountResource;
         // todo link추가하기 ex) 마이페이지, 여행계획작성페이지 등
+        // todo EntityModel<> account -> AccountResponseDto로 변경
     }
 }

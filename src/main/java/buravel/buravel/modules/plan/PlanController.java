@@ -14,13 +14,15 @@ public class PlanController {
 
     private final PlanService planService;
 
-    /**    기능은 얼추 구현 완료*/
     //todo 무한루프 -> 응답용 dto entity 마다 전부 만들어야할것같다.
+
     @PostMapping
     public ResponseEntity createPlan(@RequestBody PlanDto planDto, @CurrentUser Account account) {
         Plan plan = planService.createPlan(planDto, account);
-        EntityModel<Plan> planResource = PlanResource.modelOf(plan);
-        return ResponseEntity.ok().body(planResource);
+        PlanResponseDto planResponseDto = planService.createPlanResponse(account,plan);
+        EntityModel<PlanResponseDto> resultResource = PlanResource.modelOf(planResponseDto);
+        return ResponseEntity.ok().body(resultResource);
+
     }
 }
 
