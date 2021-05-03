@@ -45,18 +45,14 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //todo
-        Account user = accountRepository.findByEmail(accountDto.getEmail());
-        if (user == null) {
-            throw new UsernameNotFoundException(accountDto.getEmail());
-        }
+
+
 
         // 유저네임 패스워드 토큰생성 // != jwt토큰  // 유저정보를 담기위한 토큰
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(
-                        new UserAccount(user),
-                        accountDto.getPassword(),
-                        List.of(new SimpleGrantedAuthority("ROLE_USER")));
+                        accountDto.getUsername(),
+                        accountDto.getPassword());
         Authentication authenticate = authenticationManager.authenticate(authenticationToken);
         return authenticate;
     }
@@ -72,7 +68,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .withExpiresAt(new Date(System.currentTimeMillis()+JwtProperties.EXPIRATION_TIME))
                 .withClaim("id", account.getId())
                 .withClaim("username", account.getUsername())
-                .sign(Algorithm.HMAC512(JwtProperties.SECRET));
+                .sign(Algorithm.HMAC256(JwtProperties.SECRET));
         response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX + jwtToken);
+
     }
 }

@@ -41,7 +41,17 @@ public class Account {
     private LocalDateTime emailCheckTokenGeneratedAt;
 
     public void generateEmailCheckToken() {
-        this.emailCheckToken = UUID.randomUUID().toString();
+        String uuid = UUID.randomUUID().toString().replaceAll("-", "");
+        uuid = uuid.substring(0, 10);
+        this.emailCheckToken = uuid;
         this.emailCheckTokenGeneratedAt = LocalDateTime.now();
+    }
+
+    public boolean isValidToken(String token) {
+        return this.emailCheckToken.equals(token);
+    }
+
+    public void completeSignUp() {
+        this.setEmailVerified(true);
     }
 }

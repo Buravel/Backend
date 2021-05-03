@@ -16,11 +16,15 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+<<<<<<< HEAD
 import org.springframework.validation.Errors;
 import org.thymeleaf.ITemplateEngine;
+=======
+>>>>>>> 7e2d8fd0efdf08791f5a0f57b482616da8c8e942
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -33,9 +37,15 @@ public class AccountService implements UserDetailsService {
     private final ApplicationEventPublisher publisher;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
+<<<<<<< HEAD
     private final TemplateEngine templateEngine;
     private final EmailService emailService;
     //private final SignUpValidator signUpValidator;
+=======
+    private final EmailService emailService;
+    private final AppProperties appProperties;
+    private final TemplateEngine templateEngine;
+>>>>>>> 7e2d8fd0efdf08791f5a0f57b482616da8c8e942
 
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
@@ -60,6 +70,7 @@ public class AccountService implements UserDetailsService {
 
     }
 
+<<<<<<< HEAD
     /*public boolean checkSignupValidation(AccountDto accountDto, Errors errors){
         if(errors.hasErrors()){
             return true;
@@ -124,5 +135,54 @@ public class AccountService implements UserDetailsService {
 
         account.setEmailVerified(true);
         return true;
+=======
+    // signUp
+    public Account processNewAccount(AccountDto accountDto) {
+        Account account = saveNewAccount(accountDto);
+        sendSignUpConfirmEmail(account);
+        return account;
+    }
+    // save account
+    public Account saveNewAccount(AccountDto accountDto) {
+        Account map = modelMapper.map(accountDto, Account.class);
+        map.setPassword(passwordEncoder.encode(map.getPassword()));
+        map.generateEmailCheckToken();
+        Account saved = accountRepository.save(map);
+        return saved;
+    }
+    // verify email
+    private void sendSignUpConfirmEmail(Account account) {
+        Context context = new Context(); // model에 내용담아주듯이
+        context.setVariable("token",account.getEmailCheckToken());
+        context.setVariable("username", account.getUsername());
+        context.setVariable("message","Buravel 서비스 사용을 위해 코드를 복사하여 붙여넣어주세요.");
+
+        String message = templateEngine.process("mail/simple-link", context);
+
+        EmailMessage build = EmailMessage.builder()
+                .to(account.getEmail())
+                .subject("Buravel 회원 가입 인증")
+                .message(message)
+                .build();
+
+        emailService.sendEmail(build);
+    }
+
+    public void completeSignUp(Account account) {
+        Optional<Account> byId = accountRepository.findById(account.getId());
+        Account find = byId.get();
+        if (find != null) {
+            find.completeSignUp();
+        } else {
+            throw new UsernameNotFoundException(account.getUsername());
+        }
+    }
+
+    public void reSendEmailCheckToken(Account account) {
+        Account ac = accountRepository.findById(account.getId()).get();
+        ac.generateEmailCheckToken();
+        Account saved = accountRepository.save(ac);
+        sendSignUpConfirmEmail(saved);
+>>>>>>> 7e2d8fd0efdf08791f5a0f57b482616da8c8e942
     }
 }

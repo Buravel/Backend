@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Buravel</title>
+</head>
+<body>
+<div>
+    <p>안녕하세요. <span th:text="${username}"></span>님</p>
+
+    <h2 th:text="${message}">메시지</h2>
+
+    <div>
+        <small th:text="${token}"></small>
+        <p>해당 코드를 웹브라우저에 복사해서 붙여 넣으세요.</p>
+
+    </div>
+</div>
+<footer>
+    <small>Buravel&copy; 2021</small>
+</footer>
+</body>
+</html>
