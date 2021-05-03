@@ -35,12 +35,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilter(new JwtAuthenticationFilter(authenticationManager(), accountRepository))
                 .addFilter(new JwtAuthorizationFilter(authenticationManager(), accountRepository))
                 .authorizeRequests()
-<<<<<<< HEAD
-                .mvcMatchers("/signUp", "/login","/","/tempPassword", "/emailCheck").permitAll()
-=======
-                .mvcMatchers("/signUp", "/login","/","/tempPassword").permitAll()
+                .mvcMatchers("/signUp", "/login","/","/tempPassword", "/findUsername").permitAll()
                 .mvcMatchers("/emailVerification","/emailCheckToken").access("hasRole('ROLE_USER')")
->>>>>>> 7e2d8fd0efdf08791f5a0f57b482616da8c8e942
                 .anyRequest().authenticated();
 
     }
