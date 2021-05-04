@@ -2,6 +2,8 @@ package buravel.buravel.modules.planTag;
 
 import buravel.buravel.modules.plan.Plan;
 import buravel.buravel.modules.tag.Tag;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
 
 import javax.persistence.*;
@@ -12,6 +14,7 @@ import javax.persistence.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(of = "id")
 public class PlanTag {
     @Id
     @GeneratedValue

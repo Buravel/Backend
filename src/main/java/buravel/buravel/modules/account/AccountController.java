@@ -52,7 +52,10 @@ public class AccountController {
 
     //generate new emailCheckToken & re-send token
     @PostMapping("/emailCheckToken")
-    public ResponseEntity re_emailVerification(@CurrentUser Account account) {
+    public ResponseEntity resendEmailCheckToken(@CurrentUser Account account) {
+        if (account.isEmailVerified() == false) {
+            return ResponseEntity.badRequest().build();
+        }
         accountService.reSendEmailCheckToken(account);
         return ResponseEntity.ok().build();
     }

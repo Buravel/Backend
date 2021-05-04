@@ -2,9 +2,14 @@ package buravel.buravel.modules.plan;
 
 import buravel.buravel.modules.account.Account;
 import buravel.buravel.modules.planTag.PlanTag;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +20,9 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(of = "id")
 public class Plan {
+    //todo 나머지 가격들 set구현
     @Id
     @GeneratedValue
     @Column(name = "plan_id")
@@ -33,12 +40,14 @@ public class Plan {
 
     private boolean published = false;
 
-    private LocalDateTime lastModified;
+    @JsonIgnore
+    private LocalDate lastModified;
 
     @Column(nullable = false)
-    private LocalDateTime startDate;
-
-    private LocalDateTime endDate;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate startDate;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate endDate;
 
     private Long totalPrice;
     private String outputPlanTotalPrice; // post랑 비슷하게 만원단위로 끊어서 string으로 리턴

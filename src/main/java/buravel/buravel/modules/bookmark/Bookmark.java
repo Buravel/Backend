@@ -2,6 +2,8 @@ package buravel.buravel.modules.bookmark;
 
 import buravel.buravel.modules.account.Account;
 import buravel.buravel.modules.bookmarkPost.BookmarkPost;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
 
 import javax.persistence.*;
@@ -14,6 +16,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(of = "id")
 public class Bookmark {
     @Id
     @GeneratedValue
