@@ -18,15 +18,14 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 public class BookmarkPostController {
 
     private final BookmarkPostService bookmarkPostService;
-    private final BookmarkPostResource bookmarkPostResource;
+    //private final BookmarkPostResource bookmarkPostResource; 이렇게 넣으면 주입이 제대로 안됨. 따로 사용해야 함
 
     @GetMapping("/bookmark/{bookmarkId}")
-    public ResponseEntity getBookmarkPosts(@PathVariable(value = "bookmarkId") Long bookmarkId, @CurrentUser Account account){
-        // bookmark 폴더 delete시 내부 post 조회도 필요할 수 있는데, bookmarkpostcontrolller? bookmarkcontroller?
-        List<BookmarkPost> bookmarkPostList = bookmarkPostService.getBookmarkPosts(bookmarkId, account);
+    public ResponseEntity getBookmarkPosts(@PathVariable(value = "bookmarkId") Long bookmarkId/*, @CurrentUser Account account*/){
+        List<BookmarkPostResponseDto> bookmarkPostList = bookmarkPostService.getBookmarkPosts(bookmarkId);
 
-        List<EntityModel<BookmarkPost>> bookmarkPostCollect = bookmarkPostList.stream()
-                .map(bookmarkPost -> bookmarkPostResource.modelOf(bookmarkPost)).collect(Collectors.toList());
+        List<EntityModel<BookmarkPostResponseDto>> bookmarkPostCollect = bookmarkPostList.stream()
+                .map(bookmarkPostResponseDto -> BookmarkPostResource.modelOf(bookmarkPostResponseDto)).collect(Collectors.toList());
         CollectionModel collectionModel = CollectionModel.of(bookmarkPostCollect, linkTo(BookmarkPostController.class).withSelfRel());
 
         return ResponseEntity.ok(collectionModel);

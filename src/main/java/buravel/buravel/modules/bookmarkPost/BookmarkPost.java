@@ -35,7 +35,8 @@ public class BookmarkPost {
     //이 후  bookmarkPostManager가 !나! 이면서 checked == true인 bookmarkPost들을 가져오고 드래그로 끌어다 plan에 추가 등
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private Plan planOf;
+    private Plan planOf; // plan이랑 manyToMany일수도 있는데..
+    // 일단 복잡해지므로 checked == true인 새 bookmarkpost를 추가하는 것으로 구현
 
 
 }

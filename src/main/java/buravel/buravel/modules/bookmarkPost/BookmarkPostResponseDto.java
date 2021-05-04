@@ -12,8 +12,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class BookmarkPostResponseDto {
     private Long id;
-    private PostResponseDto postResponseDto;
     private boolean checked;
+    private PostResponseDto postResponseDto;
     private PlanResponseDto planResponseDto;
     private BookmarkResponseDto bookmarkResponseDto;
     //todo 북마크파트에서 어떻게 무함참조 피할지, 필요한게 무엇인지 고민
