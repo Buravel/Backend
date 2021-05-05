@@ -2,25 +2,41 @@ package buravel.buravel.modules.plan;
 
 import buravel.buravel.modules.account.Account;
 import buravel.buravel.modules.account.CurrentUser;
+import buravel.buravel.modules.errors.ErrorResource;
+import buravel.buravel.modules.plan.validator.PlanValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/plans")
 @RequiredArgsConstructor
 public class PlanController {
 
     private final PlanService planService;
+    private final PlanValidator planValidator;
+
     /**
      * Plan 작성 API
      */
     @PostMapping
-    public ResponseEntity createPlan(@RequestBody PlanDto planDto, @CurrentUser Account account) {
+    public ResponseEntity createPlan(@RequestBody @Valid PlanDto planDto, @CurrentUser Account account, Errors errors) {
+        if (errors.hasErrors()) {
+            EntityModel<Errors> jsr303 = ErrorResource.of(errors);
+            return ResponseEntity.badRequest().body(jsr303);
+        }
+        planValidator.validate(planDto,errors);
+        if (errors.hasErrors()) {
+            EntityModel<Errors> customError = ErrorResource.of(errors);
+            return ResponseEntity.badRequest().body(customError);
+        }
         Plan plan = planService.createPlan(planDto, account);
-        PlanResponseDto planResponseDto = planService.createPlanResponse(account,plan);
+        PlanResponseDto planResponseDto = planService.createPlanResponse(account, plan);
         EntityModel<PlanResponseDto> resultResource = PlanResource.modelOf(planResponseDto);
         return ResponseEntity.ok().body(resultResource);
     }

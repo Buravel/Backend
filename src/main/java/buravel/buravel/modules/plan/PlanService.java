@@ -95,13 +95,13 @@ public class PlanService {
                 post.setPrice(postDto.getPrice());
                 plan.setTotalPrice(plan.getTotalPrice()+postDto.getPrice());
                 post.setOutputPrice(generateOutputPrice(postDto.getPrice()));
+                settingPostCategory(plan,post, postDto);
                 if (postDto.getPostImage() != null) {
                     post.setPostImage(postDto.getPostImage());
                 }else{
                     setPostImageWithCategory(post);
                 }
 
-                settingPostCategory(plan,post, postDto);
                 post.setRating(postDto.getRating());
                 post.setLat(postDto.getLat());
                 post.setLog(postDto.getLog());
