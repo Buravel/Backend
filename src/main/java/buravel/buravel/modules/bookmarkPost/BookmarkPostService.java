@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -22,11 +23,13 @@ public class BookmarkPostService {
     private final ModelMapper modelMapper;
 
     public List<BookmarkPostResponseDto> getBookmarkPosts(Long bookmarkId) throws NotFoundException {
-        Bookmark bookmark = bookmarkRepository.findById(bookmarkId).get();
+        Optional<Bookmark> bookmarkEntity = bookmarkRepository.findById(bookmarkId);
 
-        if(bookmark == null){
+        if(bookmarkEntity.isEmpty()){
             throw new NotFoundException("not found");
         } // no such bookmark folder
+
+        Bookmark bookmark = bookmarkEntity.get();
 
         List<BookmarkPost> bookmarkPostList = bookmarkPostRepository.findByBookmarkAndChecked(bookmark, false);
         List<BookmarkPostResponseDto> bookmarkPostResponseDtos = new ArrayList<>();
