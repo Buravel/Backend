@@ -44,6 +44,8 @@ public class Plan {
     private LocalDate startDate;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate lastModified;
 
     private Long totalPrice= 0L;
     private String outputPlanTotalPrice; // post랑 비슷하게 만원단위로 끊어서 string으로 리턴

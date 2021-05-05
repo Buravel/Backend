@@ -5,12 +5,16 @@ import buravel.buravel.modules.account.CurrentUser;
 import buravel.buravel.modules.errors.ErrorResource;
 import buravel.buravel.modules.plan.validator.PlanValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/plans")
@@ -19,6 +23,7 @@ public class PlanController {
 
     private final PlanService planService;
     private final PlanValidator planValidator;
+
 
     @PostMapping
     public ResponseEntity createPlan(@RequestBody @Valid PlanDto planDto, @CurrentUser Account account, Errors errors) {
@@ -36,6 +41,12 @@ public class PlanController {
         EntityModel<PlanResponseDto> resultResource = PlanResource.modelOf(planResponseDto);
         return ResponseEntity.ok().body(resultResource);
 
+    }
+
+    @GetMapping
+    public ResponseEntity getAllPlans() {
+        CollectionModel<EntityModel<PlanResponseDto>> plans = planService.findAllPlans();
+        return ResponseEntity.ok(plans);
     }
 }
 
