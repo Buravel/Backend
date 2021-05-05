@@ -79,12 +79,12 @@ public class PlanService {
         Long price = plan.getTotalPrice();
         if (price < 10000) {
             plan.setOutputPlanTotalPrice(price + "원");
+        } else {
+            String string = price.toString();
+            string = string.substring(0, string.length() - 4);
+            plan.setOutputPlanTotalPrice(string + "만원");
         }
-        String string = price.toString();
-        string = string.substring(0, string.length()-4);
-        plan.setOutputPlanTotalPrice(string+"만원");
     }
-
 
     private void generatePosts(Plan plan, PostDto[][] postDtos, Account user) {
         for (int i = 0; i < postDtos.length; i++) {
@@ -252,6 +252,87 @@ public class PlanService {
         return planTagResponseDto;
     }
 
+    public Plan updatePlan(PatchPlanRequestDto patchplanRequestDto) {
+        Plan plan = planRepository.findById(patchplanRequestDto.getPlanId()).get();
+
+        Account user = plan.getPlanManager();
+
+        //planTag, Tag 삭제
+        deletePlanTags(plan);
+
+        //postTag, Tag 삭제
+        deletePostTags(plan);
+
+        //Post 삭제
+        postRepository.deleteByPlanOf(plan);
+
+        // plan 정보 수정
+        updatePlanInfo(patchplanRequestDto, plan, user);
+
+        // 받아온 post, postTag 저장
+        PostDto[][] postDtos = patchplanRequestDto.getPostDtos();
+        generatePosts(plan, postDtos, user);
+        settingOutputPlanTotalPrice(plan);
+        settingTop3ListOfPlan(plan);
+
+        return plan;
+    }
+
+    private void updatePlanInfo(PatchPlanRequestDto patchplanRequestDto, Plan plan, Account user) {
+        plan.setPlanTitle(patchplanRequestDto.getPlanTitle());
+        if (patchplanRequestDto.getPlanImage() != null) {
+            plan.setPlanImage(patchplanRequestDto.getPlanImage());
+        }
+        //todo 그게아니면 default이미지로 설정
+        plan.setPublished(patchplanRequestDto.isPublished());
+        plan.setStartDate(patchplanRequestDto.getStartDate());
+        plan.setEndDate(patchplanRequestDto.getEndDate());
+        plan.getPlanTagList().clear();
+        plan.getTop3List().clear();
+        //create planTags
+        String planTag = patchplanRequestDto.getPlanTag();
+
+        plan.setTotalPrice(0L);
+        plan.setFlightTotalPrice(0L);
+        plan.setDishTotalPrice(0L);
+        plan.setShoppingTotalPrice(0L);
+        plan.setHotelTotalPrice(0L);
+        plan.setTrafficTotalPrice(0L);
+        plan.setEtcTotalPrice(0L);
+
+        generatePlanTags(plan, planTag);
+    }
+
+    public PatchPlanResponseDto updatePlanResponse(Plan plan) {
+        PatchPlanResponseDto planResponseDto = modelMapper.map(plan, PatchPlanResponseDto.class);
+        List<PlanTag> list = plan.getPlanTagList();
+
+        for (PlanTag planTag : list) {
+            PlanTagResponseDto planTagResponseDto = createPlanTagResponseDto(planTag);
+            planResponseDto.getPlanTagResponseDtos().add(planTagResponseDto);
+        }
+        return planResponseDto;
+    }
+
+    private void deletePlanTags(Plan plan) {
+        List<PlanTag> planTagList = plan.getPlanTagList();
+        for (PlanTag plantag : planTagList) {
+            planTagRepository.deleteById(plantag.getId());
+            tagRepository.deleteById(plantag.getTag().getId());
+        }
+    }
+
+    private void deletePostTags(Plan plan) {
+        List<Post> beforePostList = postRepository.findByPlanOf(plan);
+        for (Post beforePost : beforePostList) {
+            List<PostTag> postTagList = beforePost.getPostTagList();
+
+            for (PostTag postTag: postTagList) {
+                postTagRepository.deleteByPost(beforePost);
+                tagRepository.deleteById(postTag.getTag().getId());
+            }
+        }
+    }
 }
 
   
