@@ -2,10 +2,14 @@ package buravel.buravel.modules.plan;
 
 import buravel.buravel.modules.account.Account;
 import buravel.buravel.modules.account.CurrentUser;
+import buravel.buravel.modules.errors.ErrorResource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/plans")
@@ -15,9 +19,13 @@ public class PlanController {
     private final PlanService planService;
 
     @PostMapping
-    public ResponseEntity createPlan(@RequestBody PlanDto planDto, @CurrentUser Account account) {
+    public ResponseEntity createPlan(@RequestBody @Valid PlanDto planDto, @CurrentUser Account account, Errors errors) {
+        if (errors.hasErrors()) {
+            EntityModel<Errors> jsr303 = ErrorResource.of(errors);
+            return ResponseEntity.badRequest().body(jsr303);
+        }
         Plan plan = planService.createPlan(planDto, account);
-        PlanResponseDto planResponseDto = planService.createPlanResponse(account,plan);
+        PlanResponseDto planResponseDto = planService.createPlanResponse(account, plan);
         EntityModel<PlanResponseDto> resultResource = PlanResource.modelOf(planResponseDto);
         return ResponseEntity.ok().body(resultResource);
 
