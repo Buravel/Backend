@@ -1,7 +1,9 @@
 package buravel.buravel.modules.bookmarkPost;
 
-import buravel.buravel.modules.account.Account;
-import buravel.buravel.modules.account.AccountRepository;
+import buravel.buravel.modules.bookmark.Bookmark;
+import buravel.buravel.modules.bookmark.BookmarkRepository;
+import buravel.buravel.modules.post.Post;
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -16,17 +18,57 @@ import java.util.List;
 public class BookmarkPostService {
 
     private final BookmarkPostRepository bookmarkPostRepository;
+    private final BookmarkRepository bookmarkRepository;
     private final ModelMapper modelMapper;
 
-    public List<BookmarkPostResponseDto> getBookmarkPosts(Long bookmarkId){
+    public List<BookmarkPostResponseDto> getBookmarkPosts(Long bookmarkId) throws NotFoundException {
+        Bookmark bookmark = bookmarkRepository.findById(bookmarkId).get();
 
-        List<BookmarkPost> bookmarkPostList = bookmarkPostRepository.findBookmarkPostsByBookmark_Id(bookmarkId);
+        if(bookmark == null){
+            throw new NotFoundException("not found");
+        } // no such bookmark folder
+
+        List<BookmarkPost> bookmarkPostList = bookmarkPostRepository.findByBookmarkAndChecked(bookmark, false);
         List<BookmarkPostResponseDto> bookmarkPostResponseDtos = new ArrayList<>();
 
         for(BookmarkPost bookmarkPost : bookmarkPostList){
-            bookmarkPostResponseDtos.add(modelMapper.map(bookmarkPost, BookmarkPostResponseDto.class));
+            bookmarkPostResponseDtos.add(createBookmarkPostResponseDto(bookmarkPost));
         }
 
-        return bookmarkPostResponseDtos; // todo: jpa join 찾아서 실행
+        return bookmarkPostResponseDtos;
+    }
+
+    public BookmarkPostResponseDto createBookmarkPostResponseDto(BookmarkPost bookmarkPost){
+        BookmarkPostResponseDto bookmarkPostResponseDto = modelMapper.map(bookmarkPost, BookmarkPostResponseDto.class);
+
+        if(bookmarkPost.isChecked()){
+            bookmarkPostResponseDto.setPlanOf_id(bookmarkPost.getPlanOf().getId());
+        }
+
+        bookmarkPostResponseDto.setPostBookmarkPostResponseDto(
+                createPostBookmarkPostResponseDto(bookmarkPost.getPost()));
+
+        bookmarkPostResponseDto.setBookmark_id(bookmarkPost.getBookmark().getId());
+
+        return bookmarkPostResponseDto;
+    }
+
+    public PostBookmarkPostResponseDto createPostBookmarkPostResponseDto(Post post){
+        // post 정보 매핑 - 이렇게 말고는 방법이 없나?
+        PostBookmarkPostResponseDto dto = new PostBookmarkPostResponseDto();
+
+        dto.setOriginPost_id(post.getId());
+        dto.setPostTitle(post.getPostTitle());
+        dto.setPrice(post.getPrice());
+        dto.setOutputPrice(post.getOutputPrice());
+        dto.setPostImage(post.getPostImage());
+        dto.setCategory(post.getCategory());
+        dto.setRating(post.getRating());
+        dto.setClosed(post.isClosed());
+        dto.setLat(post.getLat());
+        dto.setLog(post.getLog());
+        dto.setMemo(post.getMemo());
+
+        return dto;
     }
 }
