@@ -22,11 +22,11 @@ public class BookmarkPostService {
     private final BookmarkRepository bookmarkRepository;
     private final ModelMapper modelMapper;
 
-    public List<BookmarkPostResponseDto> getBookmarkPosts(Long bookmarkId) throws NotFoundException {
+    public List<BookmarkPostResponseDto> getBookmarkPosts(Long bookmarkId) {
         Optional<Bookmark> bookmarkEntity = bookmarkRepository.findById(bookmarkId);
 
         if(bookmarkEntity.isEmpty()){
-            throw new NotFoundException("not found");
+            return null;
         } // no such bookmark folder
 
         Bookmark bookmark = bookmarkEntity.get();
@@ -57,21 +57,9 @@ public class BookmarkPostService {
     }
 
     public PostBookmarkPostResponseDto createPostBookmarkPostResponseDto(Post post){
-        // post 정보 매핑 - 이렇게 말고는 방법이 없나?
-        PostBookmarkPostResponseDto dto = new PostBookmarkPostResponseDto();
+        PostBookmarkPostResponseDto dto = modelMapper.map(post, PostBookmarkPostResponseDto.class);
 
         dto.setOriginPost_id(post.getId());
-        dto.setPostTitle(post.getPostTitle());
-        dto.setPrice(post.getPrice());
-        dto.setOutputPrice(post.getOutputPrice());
-        dto.setPostImage(post.getPostImage());
-        dto.setCategory(post.getCategory());
-        dto.setRating(post.getRating());
-        dto.setClosed(post.isClosed());
-        dto.setLat(post.getLat());
-        dto.setLog(post.getLog());
-        dto.setMemo(post.getMemo());
-
         return dto;
     }
 }

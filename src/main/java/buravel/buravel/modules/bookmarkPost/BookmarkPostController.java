@@ -19,25 +19,22 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 public class BookmarkPostController {
 
     private final BookmarkPostService bookmarkPostService;
-    //private final BookmarkPostResource bookmarkPostResource; 이렇게 넣으면 주입이 제대로 안됨. 따로 사용해야 함
 
     @GetMapping("/bookmark/{bookmarkId}")
     public ResponseEntity getBookmarkPosts(@PathVariable(value = "bookmarkId") Long bookmarkId, @CurrentUser Account account){
-        try{
-            List<BookmarkPostResponseDto> bookmarkPostList = bookmarkPostService.getBookmarkPosts(bookmarkId);
+        List<BookmarkPostResponseDto> bookmarkPostList = bookmarkPostService.getBookmarkPosts(bookmarkId);
 
-            List<EntityModel<BookmarkPostResponseDto>> bookmarkPostCollect = bookmarkPostList.stream()
-                    .map(bookmarkPostResponseDto -> BookmarkPostResource.modelOf(bookmarkPostResponseDto))
-                    .collect(Collectors.toList());
-            CollectionModel collectionModel = CollectionModel
-                    .of(bookmarkPostCollect, linkTo(BookmarkPostController.class)
-                    .withSelfRel());
-
-            return ResponseEntity.ok(collectionModel);
-
-        } catch(NotFoundException e){
+        if(bookmarkPostList == null){
             return ResponseEntity.badRequest().build();
         }
+
+        List<EntityModel<BookmarkPostResponseDto>> bookmarkPostCollect = bookmarkPostList.stream()
+                .map(bookmarkPostResponseDto -> BookmarkPostResource.modelOf(bookmarkPostResponseDto))
+                .collect(Collectors.toList());
+        CollectionModel collectionModel = CollectionModel
+                .of(bookmarkPostCollect, linkTo(BookmarkPostController.class).withSelfRel());
+
+        return ResponseEntity.ok(collectionModel);
 
     }
 
