@@ -62,4 +62,14 @@ public class BookmarkPostService {
         dto.setOriginPost_id(post.getId());
         return dto;
     }
+
+    public BookmarkPostResponseDto addBookmarkPosts(Long bookmarkId, Long postId){
+        BookmarkPostResponseDto bookmarkPostResponseDto = new BookmarkPostResponseDto();
+
+        return bookmarkPostResponseDto;
+    }
+
+    public void deleteBookmarkPost(Long bookmarkPostId, Long postId){
+        return;
+    }
 }
