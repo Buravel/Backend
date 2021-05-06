@@ -53,7 +53,9 @@ public class BookmarkPostController {
                                              @PathVariable(value = "postId") Long postId,
                                              @CurrentUser Account account){
 
-        bookmarkPostService.deleteBookmarkPost(bookmarkPostId, postId);
+        if(!bookmarkPostService.deleteBookmarkPost(bookmarkPostId, postId)){
+            ResponseEntity.badRequest().build();
+        }
 
         return ResponseEntity.ok().build();
     }
