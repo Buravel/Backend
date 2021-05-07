@@ -16,10 +16,14 @@ import buravel.buravel.modules.tag.Tag;
 import buravel.buravel.modules.tag.TagRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -40,11 +44,51 @@ public class PlanService {
         Plan plan = generatePlan(planDto, user);
         PostDto[][] postDtos = planDto.getPostDtos();
         generatePosts(plan,postDtos,user);
-
-        // plan의 flightTotalPrice등 set하고 save 후 리턴
-        // totalPrice
+        settingOutputPlanTotalPrice(plan);
+        settingTop3ListOfPlan(plan);
         return plan;
     }
+
+    private void settingTop3ListOfPlan(Plan plan) {
+        HashMap<Long, String> map = new HashMap<>();
+        if (plan.getFlightTotalPrice() > 0) {
+            map.put(plan.getFlightTotalPrice(), "FLIGHT");
+        }
+        if (plan.getDishTotalPrice() > 0) {
+            map.put(plan.getDishTotalPrice(), "DISH");
+        }
+        if (plan.getShoppingTotalPrice() > 0) {
+            map.put(plan.getShoppingTotalPrice(), "SHOPPING");
+        }
+        if (plan.getHotelTotalPrice() > 0) {
+            map.put(plan.getHotelTotalPrice(), "HOTEL");
+        }
+        if (plan.getTrafficTotalPrice() > 0) {
+            map.put(plan.getTrafficTotalPrice(), "TRAFFIC");
+        }
+        if (plan.getEtcTotalPrice() > 0) {
+            map.put(plan.getEtcTotalPrice(), "ETC");
+        }
+        Object[] objects = map.keySet().toArray();
+        Arrays.sort(objects);
+        for (int i = objects.length - 1; i >= 0; i--) {
+            if (plan.getTop3List().size() == 3) {
+                break;
+            }
+            plan.getTop3List().add(map.get(objects[i]));
+        }
+    }
+
+    private void settingOutputPlanTotalPrice(Plan plan) {
+        Long price = plan.getTotalPrice();
+        if (price < 10000) {
+            plan.setOutputPlanTotalPrice(price + "원");
+        }
+        String string = price.toString();
+        string = string.substring(0, string.length()-4);
+        plan.setOutputPlanTotalPrice(string+"만원");
+    }
+
 
     private void generatePosts(Plan plan, PostDto[][] postDtos, Account user) {
         for (int i = 0; i < postDtos.length; i++) {
@@ -53,12 +97,15 @@ public class PlanService {
                 Post post = new Post();
                 post.setPostTitle(postDto.getPostTitle());
                 post.setPrice(postDto.getPrice());
+                plan.setTotalPrice(plan.getTotalPrice()+postDto.getPrice());
                 post.setOutputPrice(generateOutputPrice(postDto.getPrice()));
+                settingPostCategory(plan,post, postDto);
                 if (postDto.getPostImage() != null) {
                     post.setPostImage(postDto.getPostImage());
+                }else{
+                    setPostImageWithCategory(post);
                 }
 
-                settingPostCategory(post, postDto.getCategory());
                 post.setRating(postDto.getRating());
                 post.setLat(postDto.getLat());
                 post.setLog(postDto.getLog());
@@ -73,11 +120,6 @@ public class PlanService {
                     post.setClosed(true);
                 }
                 Post saved = postRepository.save(post);
-                //todo 만약 image null이면 카테고리에 맞게 디폴트이미지주기
-                //todo 현재 디폴트이미지 아직 못 받음
-                /*if (saved.getPostImage() == null) {
-                    setPostImageWithCategory(saved);
-                }*/
 
                 generatePostTags(saved, postDto.getTags());
             }
@@ -86,17 +128,17 @@ public class PlanService {
 
     private void setPostImageWithCategory(Post saved) {
         if (saved.getCategory() == PostCategory.FLIGHT) {
-            //default 이미지로 set
+            saved.setPostImage("default FLIGHT");
         } else if (saved.getCategory() == PostCategory.DISH) {
-
+            saved.setPostImage("default DISH");
         } else if (saved.getCategory() == PostCategory.SHOPPING) {
-
+            saved.setPostImage("default SHOPPING");
         } else if (saved.getCategory() == PostCategory.HOTEL) {
-
+            saved.setPostImage("default HOTEL");
         } else if (saved.getCategory() == PostCategory.TRAFFIC) {
-
+            saved.setPostImage("default TRAFFIC");
         } else {
-
+            saved.setPostImage("default ETC");
         }
     }
 
@@ -117,25 +159,32 @@ public class PlanService {
         }
     }
 
-    private void settingPostCategory(Post post, String category) {
+    private void settingPostCategory(Plan plan, Post post, PostDto dto) {
+        String category = dto.getCategory();
         switch (category) {
             case "FLIGHT":
                 post.setCategory(PostCategory.FLIGHT);
+                plan.setFlightTotalPrice(plan.getFlightTotalPrice()+dto.getPrice());
                 break;
             case "DISH":
                 post.setCategory(PostCategory.DISH);
+                plan.setDishTotalPrice(plan.getDishTotalPrice()+dto.getPrice());
                 break;
             case "SHOPPING":
                 post.setCategory(PostCategory.SHOPPING);
+                plan.setShoppingTotalPrice(plan.getShoppingTotalPrice()+dto.getPrice());
                 break;
             case "HOTEL":
                 post.setCategory(PostCategory.HOTEL);
+                plan.setHotelTotalPrice(plan.getHotelTotalPrice()+dto.getPrice());
                 break;
             case "TRAFFIC":
                 post.setCategory(PostCategory.TRAFFIC);
+                plan.setTrafficTotalPrice(plan.getTrafficTotalPrice()+dto.getPrice());
                 break;
             case "ETC":
                 post.setCategory(PostCategory.ETC);
+                plan.setEtcTotalPrice(plan.getEtcTotalPrice()+dto.getPrice());
                 break;
         }
     }
@@ -153,11 +202,12 @@ public class PlanService {
     private Plan generatePlan(PlanDto planDto, Account user) {
         Plan plan = new Plan();
         plan.setPlanManager(user);
+        plan.setLastModified(LocalDate.now());
         plan.setPlanTitle(planDto.getPlanTitle());
         if (planDto.getPlanImage() != null) {
             plan.setPlanImage(planDto.getPlanImage());
         }
-        //todo 그게아니면 default이미지로 설정
+        // image가 null이면 프론트에서 디폴트 이미지
         plan.setPublished(planDto.isPublished());
         plan.setStartDate(planDto.getStartDate());
         plan.setEndDate(planDto.getEndDate());
@@ -206,6 +256,22 @@ public class PlanService {
         return planTagResponseDto;
     }
 
+    public CollectionModel<EntityModel<PlanResponseDto>> findAllPlans() {
+        List<Plan> plans = planRepository.findAllByPublishedOrderByLastModified(true);
+        List<PlanResponseDto> planResponseDtos = new ArrayList<>();
+
+        for (Plan plan : plans) {
+            Long id = plan.getPlanManager().getId();
+            Account account = accountRepository.findById(id).get();
+            PlanResponseDto planResponse = createPlanResponse(account, plan);
+            planResponseDtos.add(planResponse);
+        }
+
+        List<EntityModel<PlanResponseDto>> collect =
+                planResponseDtos.stream().map(p -> PlanResource.modelOf(p)).collect(Collectors.toList());
+        CollectionModel<EntityModel<PlanResponseDto>> result = CollectionModel.of(collect);
+        return result;
+    }
 }
 
   

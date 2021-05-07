@@ -22,7 +22,6 @@ import java.util.List;
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
 public class Plan {
-    //todo 나머지 가격들 set구현
     @Id
     @GeneratedValue
     @Column(name = "plan_id")
@@ -40,24 +39,23 @@ public class Plan {
 
     private boolean published = false;
 
-    @JsonIgnore
-    private LocalDate lastModified;
-
     @Column(nullable = false)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate lastModified;
 
-    private Long totalPrice;
+    private Long totalPrice= 0L;
     private String outputPlanTotalPrice; // post랑 비슷하게 만원단위로 끊어서 string으로 리턴
 
-    private Long flightTotalPrice;
-    private Long dishTotalPrice;
-    private Long shoppingTotalPrice;
-    private Long hotelTotalPrice;
-    private Long trafficTotalPrice;
-    private Long etcTotalPrice;
+    private Long flightTotalPrice = 0L;
+    private Long dishTotalPrice= 0L;
+    private Long shoppingTotalPrice= 0L;
+    private Long hotelTotalPrice= 0L;
+    private Long trafficTotalPrice= 0L;
+    private Long etcTotalPrice= 0L;
 
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> top3List = new ArrayList<>();

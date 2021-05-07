@@ -6,7 +6,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import javax.persistence.Column;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import java.time.LocalDate;
 
 
@@ -18,12 +20,12 @@ public class PlanDto {
     @NotBlank
     private String planTitle;
     private String planImage;
-    @NotBlank
+    @Column(nullable = false)
     private boolean published;
-    @NotBlank
+    @Column(nullable = false)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
-    @NotBlank
+    @Column(nullable = false)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
     private String planTag;

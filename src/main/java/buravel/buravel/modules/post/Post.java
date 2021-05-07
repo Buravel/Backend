@@ -29,7 +29,7 @@ public class Post {
     private String postTitle;
 
     @Column(nullable = false)
-    private Long price;
+    private Long price= 0L;
 
     //보여줄 땐 x.x만원  - 가격입력받을 때  12345원 -> 345버리고 12 string으로 변환 후 중간에 . 추가하는 로직으로 필드값할당
     private String outputPrice;
