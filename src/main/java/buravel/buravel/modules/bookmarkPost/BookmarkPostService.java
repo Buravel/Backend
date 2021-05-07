@@ -72,15 +72,37 @@ public class BookmarkPostService {
         return bookmarkPostResponseDto;
     }
 
-    public boolean deleteBookmarkPost(Long bookmarkPostId, Long postId){
+    public boolean processDeleteBookmarkPost(Long bookmarkPostId, Long postId){
         Optional<BookmarkPost> bookmarkPostEntity = bookmarkPostRepository.findById(bookmarkPostId);
         if(bookmarkPostEntity.isEmpty()){
             return false;
         } // no such bookmark post
 
-        // todo: postId가 꼭 필요한지 고민. 필요하다면 가져온 bookmarkpost의 정보와 일치하는지 검사
-        // todo: checked == false인 것만 삭제하도록 검사 추가
-        bookmarkPostRepository.deleteById(bookmarkPostId);
+        BookmarkPost bookmarkPost = bookmarkPostEntity.get();
+
+        if(bookmarkPost.getPost().getId() != postId){
+            return false;
+        } // postId 잘못 들어옴. todo: 필요한가? postId 받을 필요가 없어보임. 오히려 null 잘못받으면 에러날 듯
+
+        return deleteBookmarkPost(bookmarkPost);
+    }
+
+    public boolean deleteBookmarkPost(BookmarkPost bookmarkPost){
+        if(bookmarkPost.isChecked()){
+            return false;
+        } // there is a plan that uses this bookmark post.
+
+        Optional<Bookmark> bookmarkEntity = bookmarkRepository.findById(bookmarkPost.getBookmark().getId());
+        if(!bookmarkEntity.isEmpty()){
+            bookmarkEntity.get().getBookmarkPosts().remove(bookmarkPost);
+        } // 양방향 북마크 매핑 삭제
+
+        Optional<Post> postEntity = postRepository.findById(bookmarkPost.getPost().getId());
+        if(!postEntity.isEmpty()){
+            postEntity.get().getBookmarkPosts().remove(bookmarkPost);
+        } // 양방향 포스트 매핑 삭제
+
+        bookmarkPostRepository.deleteById(bookmarkPost.getId());
         return true;
     }
     
