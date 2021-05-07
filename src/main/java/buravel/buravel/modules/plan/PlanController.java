@@ -4,6 +4,7 @@ import buravel.buravel.modules.account.Account;
 import buravel.buravel.modules.account.CurrentUser;
 import buravel.buravel.modules.errors.ErrorResource;
 import buravel.buravel.modules.plan.validator.PlanValidator;
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -48,23 +49,35 @@ public class PlanController {
         CollectionModel<EntityModel<PlanResponseDto>> plans = planService.findAllPlans();
         return ResponseEntity.ok(plans);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity getPlan(@PathVariable Long id) throws NotFoundException {
+        EntityModel<PlanWithPostResponseDto> result = planService.getPlanWithPlanId(id);
+        return ResponseEntity.ok(result);
+    }
 }
 
-  /*{
-     "planTitle":"buravel",
-     "published":"false",
+  /*
+  * {
+     "planTitle":"blue",
+     "published":"true",
      "startDate":"2021-05-02",
-     "endDate":"2021-05-02",
+     "endDate":"2021-05-03",
      "planTag":"swiss,itlay",
      "postDtos":
      [
          [
-          {"postTitle":"first","price":"10000","category":"FLIGHT","rating":"4.5","lat":"12.12","log":"21.21","tags":"spring,hello"},
+          {"postTitle":"first","price":"10000","postImage":"image","category":"FLIGHT","rating":"4.5","lat":"12.12","log":"21.21","tags":"spring,hello"},
           {"postTitle":"secocnd","price":"20000","category":"DISH","rating":"4.5","lat":"12.12","log":"21.21","tags":"spring,hello"}
          ],
          [
-          {"postTitle":"third","price":"30000","category":"FLIGHT","rating":"4.5","lat":"12.12","log":"21.21","tags":"spring,hello"},
-          {"postTitle":"forth","price":"40000","category":"DISH","rating":"4.5","lat":"12.12","log":"21.21","tags":"spring,hello"}
+          {"postTitle":"third","price":"30000","postImage":"222","category":"ETC","rating":"4.5","lat":"12.12","log":"21.21","tags":"spring,hello"},
+          {"postTitle":"forth","price":"40000","category":"HOTEL","rating":"4.5","lat":"12.12","log":"21.21","tags":"spring,hello"}
+         ],
+         [
+          {"postTitle":"fifth","price":"10000","category":"SHOPPING","rating":"4.5","lat":"12.12","log":"21.21","tags":"spring,hello"},
+          {"postTitle":"sixth","price":"20000","category":"TRAFFIC","rating":"4.5","lat":"12.12","log":"21.21","tags":"spring,hello"}
          ]
      ]
-  }*/
+  }
+  * */
