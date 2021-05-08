@@ -16,10 +16,14 @@ import buravel.buravel.modules.tag.Tag;
 import buravel.buravel.modules.tag.TagRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -123,7 +127,6 @@ public class PlanService {
     }
 
     private void setPostImageWithCategory(Post saved) {
-        //todo 현재 디폴트이미지 아직 못 받음
         if (saved.getCategory() == PostCategory.FLIGHT) {
             saved.setPostImage("default FLIGHT");
         } else if (saved.getCategory() == PostCategory.DISH) {
@@ -199,11 +202,12 @@ public class PlanService {
     private Plan generatePlan(PlanDto planDto, Account user) {
         Plan plan = new Plan();
         plan.setPlanManager(user);
+        plan.setLastModified(LocalDate.now());
         plan.setPlanTitle(planDto.getPlanTitle());
         if (planDto.getPlanImage() != null) {
             plan.setPlanImage(planDto.getPlanImage());
         }
-        //todo 그게아니면 default이미지로 설정
+        // image가 null이면 프론트에서 디폴트 이미지
         plan.setPublished(planDto.isPublished());
         plan.setStartDate(planDto.getStartDate());
         plan.setEndDate(planDto.getEndDate());
@@ -252,6 +256,22 @@ public class PlanService {
         return planTagResponseDto;
     }
 
+    public CollectionModel<EntityModel<PlanResponseDto>> findAllPlans() {
+        List<Plan> plans = planRepository.findAllByPublishedOrderByLastModified(true);
+        List<PlanResponseDto> planResponseDtos = new ArrayList<>();
+
+        for (Plan plan : plans) {
+            Long id = plan.getPlanManager().getId();
+            Account account = accountRepository.findById(id).get();
+            PlanResponseDto planResponse = createPlanResponse(account, plan);
+            planResponseDtos.add(planResponse);
+        }
+
+        List<EntityModel<PlanResponseDto>> collect =
+                planResponseDtos.stream().map(p -> PlanResource.modelOf(p)).collect(Collectors.toList());
+        CollectionModel<EntityModel<PlanResponseDto>> result = CollectionModel.of(collect);
+        return result;
+    }
 }
 
   
