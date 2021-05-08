@@ -72,17 +72,13 @@ public class BookmarkPostService {
         return bookmarkPostResponseDto;
     }
 
-    public boolean processDeleteBookmarkPost(Long bookmarkPostId, Long postId){
+    public boolean processDeleteBookmarkPost(Long bookmarkPostId){
         Optional<BookmarkPost> bookmarkPostEntity = bookmarkPostRepository.findById(bookmarkPostId);
         if(bookmarkPostEntity.isEmpty()){
             return false;
         } // no such bookmark post
 
         BookmarkPost bookmarkPost = bookmarkPostEntity.get();
-
-        if(bookmarkPost.getPost().getId() != postId){
-            return false;
-        } // postId 잘못 들어옴. todo: 필요한가? postId 받을 필요가 없어보임. 오히려 null 잘못받으면 에러날 듯
 
         return deleteBookmarkPost(bookmarkPost);
     }
