@@ -131,31 +131,30 @@ public class PlanService {
     }
 
     private void setPostImageWithCategory(Post saved) {
-        String dataUri = "";
-        if (saved.getCategory() == PostCategory.FLIGHT) {
-            dataUri = imageToDatUri("FLIGHT");
-            saved.setPostImage(dataUri);
-        } else if (saved.getCategory() == PostCategory.DISH) {
-            dataUri = imageToDatUri("DISH");
-            saved.setPostImage(dataUri);
-            //saved.setPostImage("default DISH");
-        } else if (saved.getCategory() == PostCategory.SHOPPING) {
-            dataUri = imageToDatUri("SHOPPING");
-            saved.setPostImage(dataUri);
-            //saved.setPostImage("default SHOPPING");
-        } else if (saved.getCategory() == PostCategory.HOTEL) {
-            dataUri = imageToDatUri("HOTEL");
-            saved.setPostImage(dataUri);
-            //saved.setPostImage("default HOTEL");
-        } else if (saved.getCategory() == PostCategory.TRAFFIC) {
-            dataUri = imageToDatUri("TRAFFIC");
-            saved.setPostImage(dataUri);
-            //saved.setPostImage("default TRAFFIC");
-        } else {
-            dataUri = imageToDatUri("ETC");
-            saved.setPostImage(dataUri);
-            //saved.setPostImage("default ETC");
+        String temp = "";
+        PostCategory category = saved.getCategory();
+        switch (category.toString()) {
+            case "FLIGHT":
+                temp = "FLIGHT";
+                break;
+            case "DISH":
+                temp = "DISH";
+                break;
+            case "SHOPPING":
+                temp = "SHOPPING";
+                break;
+            case "HOTEL":
+                temp = "HOTEL";
+                break;
+            case "TRAFFIC":
+                temp = "TRAFFIC";
+                break;
+            case "ETC":
+                temp = "ETC";
+                break;
         }
+        String uri = imageToDatUri(temp);
+        saved.setPostImage(uri);
     }
 
     private String imageToDatUri(String keyword) {
