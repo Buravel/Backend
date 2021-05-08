@@ -10,6 +10,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -48,6 +49,9 @@ public class AccountService implements UserDetailsService {
         Account account = accountRepository.findByEmail(email);
         if (account == null) {
             throw new UsernameNotFoundException(email);
+        }
+        if (!account.isEmailVerified()) {
+            throw new AccessDeniedException("이메일 인증된 회원만 가능합니다.");
         }
         // temp pass create
         String uuid = UUID.randomUUID().toString().replaceAll("-", "");
