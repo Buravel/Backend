@@ -6,21 +6,25 @@ import buravel.buravel.modules.account.AccountResponseDto;
 import buravel.buravel.modules.planTag.PlanTag;
 import buravel.buravel.modules.planTag.PlanTagRepository;
 import buravel.buravel.modules.planTag.PlanTagResponseDto;
-import buravel.buravel.modules.post.Post;
-import buravel.buravel.modules.post.PostCategory;
-import buravel.buravel.modules.post.PostDto;
-import buravel.buravel.modules.post.PostRepository;
+import buravel.buravel.modules.post.*;
 import buravel.buravel.modules.postTag.PostTag;
 import buravel.buravel.modules.postTag.PostTagRepository;
+import buravel.buravel.modules.postTag.PostTagResponseDto;
 import buravel.buravel.modules.tag.Tag;
 import buravel.buravel.modules.tag.TagRepository;
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.Convert;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -127,19 +131,41 @@ public class PlanService {
     }
 
     private void setPostImageWithCategory(Post saved) {
-        if (saved.getCategory() == PostCategory.FLIGHT) {
-            saved.setPostImage("default FLIGHT");
-        } else if (saved.getCategory() == PostCategory.DISH) {
-            saved.setPostImage("default DISH");
-        } else if (saved.getCategory() == PostCategory.SHOPPING) {
-            saved.setPostImage("default SHOPPING");
-        } else if (saved.getCategory() == PostCategory.HOTEL) {
-            saved.setPostImage("default HOTEL");
-        } else if (saved.getCategory() == PostCategory.TRAFFIC) {
-            saved.setPostImage("default TRAFFIC");
-        } else {
-            saved.setPostImage("default ETC");
+        String temp = "";
+        PostCategory category = saved.getCategory();
+        switch (category.toString()) {
+            case "FLIGHT":
+                temp = "FLIGHT";
+                break;
+            case "DISH":
+                temp = "DISH";
+                break;
+            case "SHOPPING":
+                temp = "SHOPPING";
+                break;
+            case "HOTEL":
+                temp = "HOTEL";
+                break;
+            case "TRAFFIC":
+                temp = "TRAFFIC";
+                break;
+            case "ETC":
+                temp = "ETC";
+                break;
         }
+        String uri = imageToDatUri(temp);
+        saved.setPostImage(uri);
+    }
+
+    private String imageToDatUri(String keyword) {
+        byte[] bytes = new byte[0];
+        try {
+            bytes = getClass().getResourceAsStream("/static/images/"+keyword + ".png").readAllBytes();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String dataUri = new String(Base64.getEncoder().encode(bytes));
+        return dataUri;
     }
 
 
@@ -206,6 +232,9 @@ public class PlanService {
         plan.setPlanTitle(planDto.getPlanTitle());
         if (planDto.getPlanImage() != null) {
             plan.setPlanImage(planDto.getPlanImage());
+        } else {
+            String defaultPlanImage = imageToDatUri("DefaultPlan");
+            plan.setPlanImage(defaultPlanImage);
         }
         // image가 null이면 프론트에서 디폴트 이미지
         plan.setPublished(planDto.isPublished());
@@ -271,6 +300,54 @@ public class PlanService {
                 planResponseDtos.stream().map(p -> PlanResource.modelOf(p)).collect(Collectors.toList());
         CollectionModel<EntityModel<PlanResponseDto>> result = CollectionModel.of(collect);
         return result;
+    }
+
+    public EntityModel<PlanWithPostResponseDto> getPlanWithPlanId(Long id) throws NotFoundException {
+        Optional<Plan> byId = planRepository.findById(id);
+        if (byId.isEmpty()) {
+            throw new NotFoundException("해당 여행계획이 존재하지 않습니다.");
+        }
+        Plan plan = byId.get();
+        List<Post> posts = postRepository.findAllByPlanOf(plan);
+        //planWithPostResponseDto의 plan부분 세팅
+        PlanWithPostResponseDto ppdto = createPlanWithPostResponseDto(plan);
+        //planWithPostResponseDto의 post부분 setting
+        for (Post post : posts) {
+            PostForPlanResponseDto dto = createPostForPlanResponse(post);
+            ppdto.getPostForPlanResponseDtos().add(dto);
+        }
+        EntityModel<PlanWithPostResponseDto> result = PlanWithPostResource.modelOf(ppdto);
+        return result;
+        //todo 카테고리 어떻게 응답으로 나오는지 보기
+    }
+
+    private PlanWithPostResponseDto createPlanWithPostResponseDto(Plan plan) {
+        PlanWithPostResponseDto map = modelMapper.map(plan, PlanWithPostResponseDto.class);
+        //planManager부분
+        AccountResponseDto aDto = createAccountResponseDto(plan.getPlanManager());
+        map.setAccountResponseDto(aDto);
+        //planTag부분
+        List<PlanTag> planTagList = planTagRepository.findAllByPlan(plan);
+        for (PlanTag planTag : planTagList) {
+            PlanTagResponseDto ptDto = createPlanTagResponseDto(planTag);
+            map.getPlanTagResponseDtos().add(ptDto);
+        }
+        return map;
+    }
+
+    private PostForPlanResponseDto createPostForPlanResponse(Post post) {
+        // postTagResponseDto제외 나머지 정보 set
+        PostForPlanResponseDto map = modelMapper.map(post, PostForPlanResponseDto.class);
+        //현재 포스트의 모든 태그들 -> postTagResponsDto
+        List<PostTag> postTagList = postTagRepository.findAllByPost(post);
+        for (PostTag postTag : postTagList) {
+            PostTagResponseDto postTagResponseDto = new PostTagResponseDto();
+            Tag tag = postTag.getTag();
+            postTagResponseDto.setPostTagTitle(tag.getTagTitle());
+            //PostForPlanResponseDto의 postTagResponseDto리스트에 add
+            map.getPostTagResponseDtoList().add(postTagResponseDto);
+        }
+        return map;
     }
 }
 
