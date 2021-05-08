@@ -48,12 +48,11 @@ public class BookmarkPostController {
         return ResponseEntity.ok(bookmarkResource);
     }
 
-    @DeleteMapping("/bookmark/post/{bookmarkPostId}/{postId}")
+    @DeleteMapping("/bookmark/post/{bookmarkPostId}")
     public ResponseEntity deleteBookmarkPost(@PathVariable(value = "bookmarkPostId") Long bookmarkPostId,
-                                             @PathVariable(value = "postId") Long postId,
                                              @CurrentUser Account account){
 
-        if(!bookmarkPostService.processDeleteBookmarkPost(bookmarkPostId, postId)){
+        if(!bookmarkPostService.processDeleteBookmarkPost(bookmarkPostId)){
             return ResponseEntity.badRequest().build();
         }
 
