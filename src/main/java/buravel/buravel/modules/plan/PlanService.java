@@ -49,8 +49,18 @@ public class PlanService {
         PostDto[][] postDtos = planDto.getPostDtos();
         generatePosts(plan,postDtos,user);
         settingOutputPlanTotalPrice(plan);
+        settingPlanRating(plan);
         settingTop3ListOfPlan(plan);
         return plan;
+    }
+
+    private void settingPlanRating(Plan plan) {
+        int count = postRepository.countByPlanOf(plan);
+        Float planRating = plan.getPlanRating();
+        String val = (planRating / count) + "";
+        val = val.substring(0, 3);
+        float result = Float.parseFloat(val);
+        plan.setPlanRating(result);
     }
 
     private void settingTop3ListOfPlan(Plan plan) {
@@ -111,6 +121,7 @@ public class PlanService {
                 }
 
                 post.setRating(postDto.getRating());
+                plan.setPlanRating(plan.getPlanRating()+ postDto.getRating());
                 post.setLat(postDto.getLat());
                 post.setLog(postDto.getLog());
                 post.setDay(i);

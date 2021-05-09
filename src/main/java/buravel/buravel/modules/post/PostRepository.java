@@ -9,4 +9,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 public interface PostRepository extends JpaRepository<Post,Long> {
     List<Post> findAllByPlanOf(Plan plan);
+
+
+    int countByPlanOf(Plan plan);
 }
