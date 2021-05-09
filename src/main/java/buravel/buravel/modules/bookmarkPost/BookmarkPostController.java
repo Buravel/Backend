@@ -2,6 +2,7 @@ package buravel.buravel.modules.bookmarkPost;
 
 import buravel.buravel.modules.account.Account;
 import buravel.buravel.modules.account.CurrentUser;
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -20,12 +21,13 @@ public class BookmarkPostController {
     private final BookmarkPostService bookmarkPostService;
 
     @GetMapping("/bookmark/{bookmarkId}")
-    public ResponseEntity getBookmarkPosts(@PathVariable(value = "bookmarkId") Long bookmarkId, @CurrentUser Account account){
+    public ResponseEntity getBookmarkPosts(@PathVariable(value = "bookmarkId") Long bookmarkId,
+                                           @CurrentUser Account account) throws NotFoundException {
         List<BookmarkPostResponseDto> bookmarkPostList = bookmarkPostService.getBookmarkPosts(bookmarkId);
 
-        if(bookmarkPostList == null){
+        /*if(bookmarkPostList == null){
             return ResponseEntity.badRequest().build();
-        }
+        }*/
 
         List<EntityModel<BookmarkPostResponseDto>> bookmarkPostCollect = bookmarkPostList.stream()
                 .map(bookmarkPostResponseDto -> BookmarkPostResource.modelOf(bookmarkPostResponseDto))
@@ -50,7 +52,7 @@ public class BookmarkPostController {
 
     @DeleteMapping("/bookmark/post/{bookmarkPostId}")
     public ResponseEntity deleteBookmarkPost(@PathVariable(value = "bookmarkPostId") Long bookmarkPostId,
-                                             @CurrentUser Account account){
+                                             @CurrentUser Account account) throws NotFoundException {
 
         if(!bookmarkPostService.processDeleteBookmarkPost(bookmarkPostId)){
             return ResponseEntity.badRequest().build();
