@@ -25,11 +25,11 @@ public class BookmarkPostService {
     private final PostRepository postRepository;
     private final ModelMapper modelMapper;
 
-    public List<BookmarkPostResponseDto> getBookmarkPosts(Long bookmarkId) {
+    public List<BookmarkPostResponseDto> getBookmarkPosts(Long bookmarkId) throws NotFoundException{
         Optional<Bookmark> bookmarkEntity = bookmarkRepository.findById(bookmarkId);
 
         if(bookmarkEntity.isEmpty()){
-            return null;
+            throw new NotFoundException("해당 북마크 폴더가 존재하지 않습니다.");
         } // no such bookmark folder
 
         Bookmark bookmark = bookmarkEntity.get();
@@ -72,10 +72,10 @@ public class BookmarkPostService {
         return bookmarkPostResponseDto;
     }
 
-    public boolean processDeleteBookmarkPost(Long bookmarkPostId){
+    public boolean processDeleteBookmarkPost(Long bookmarkPostId) throws NotFoundException{
         Optional<BookmarkPost> bookmarkPostEntity = bookmarkPostRepository.findById(bookmarkPostId);
         if(bookmarkPostEntity.isEmpty()){
-            return false;
+            throw new NotFoundException("해당 북마크 포스트가 존재하지 않습니다.");
         } // no such bookmark post
 
         BookmarkPost bookmarkPost = bookmarkPostEntity.get();
