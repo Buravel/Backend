@@ -1,6 +1,7 @@
 package buravel.buravel.modules.account;
 
 import buravel.buravel.modules.errors.ErrorResource;
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
@@ -42,20 +43,19 @@ public class AccountController {
     }
 
     @PostMapping("/emailVerification")
-    public ResponseEntity emailVerification(@CurrentUser Account account,@RequestParam String token) {
+    public ResponseEntity emailVerification(@CurrentUser Account account,@RequestParam String token) throws NotFoundException {
+        Account found = accountRepository.findById(account.getId())
+                .orElseThrow(() -> new NotFoundException(account.getUsername()));
         if (!account.isValidToken(token)) {
             return ResponseEntity.badRequest().build();
         }
-        accountService.completeSignUp(account);
+        accountService.completeSignUp(found);
         return ResponseEntity.ok().build();
     }
 
     //generate new emailCheckToken & re-send token
     @PostMapping("/emailCheckToken")
     public ResponseEntity resendEmailCheckToken(@CurrentUser Account account) {
-        if (account.isEmailVerified() == false) {
-            return ResponseEntity.badRequest().build();
-        }
         accountService.reSendEmailCheckToken(account);
         return ResponseEntity.ok().build();
     }
@@ -72,13 +72,5 @@ public class AccountController {
             return ResponseEntity.badRequest().build();
 
         return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/hello")
-    public String hello(@CurrentUser Account account) {
-        if (account == null) {
-            throw new AccessDeniedException("권한없음");
-        }
-        return account.getUsername()+"님 안녕하세요~";
     }
 }
