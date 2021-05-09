@@ -25,6 +25,7 @@ public class PlanResponseDto {
     private LocalDate startDate;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
+    private Float planRating;
     private Long totalPrice;
     private String outputPlanTotalPrice;
     private Long flightTotalPrice;

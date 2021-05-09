@@ -35,6 +35,7 @@ public class PlanWithPostResponseDto {
     private Long trafficTotalPrice;
     private Long etcTotalPrice;
     private List<String> top3List = new ArrayList<>();
+    private float planRating;
 
     private AccountResponseDto accountResponseDto;
     private List<PlanTagResponseDto> planTagResponseDtos = new ArrayList<>();

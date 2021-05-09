@@ -39,6 +39,8 @@ public class Plan {
 
     private boolean published = false;
 
+    private Float planRating=0F;
+
     @Column(nullable = false)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;

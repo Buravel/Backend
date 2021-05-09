@@ -23,7 +23,8 @@ public class Account {
     @Column(name = "account_id")
     private Long id;
 
-    private String username;
+    private String username; // 유저id
+    private String nickname; //유저닉네임
 
     @JsonIgnore
     @Column(nullable = false)
