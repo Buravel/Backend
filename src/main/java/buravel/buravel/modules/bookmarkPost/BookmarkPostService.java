@@ -110,7 +110,7 @@ public class BookmarkPostService {
 
         return bookmarkPost;
     }
-
+    
     public boolean processDeleteBookmarkPost(Long bookmarkPostId) throws NotFoundException{
         Optional<BookmarkPost> bookmarkPostEntity = bookmarkPostRepository.findById(bookmarkPostId);
         if(bookmarkPostEntity.isEmpty()){
