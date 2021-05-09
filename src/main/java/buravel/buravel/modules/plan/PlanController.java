@@ -46,6 +46,7 @@ public class PlanController {
 
     @GetMapping
     public ResponseEntity getAllPlans() {
+        //todo 이걸 그냥 없애고 검색에 pageabledefault로 가져가는게 나을듯
         CollectionModel<EntityModel<PlanResponseDto>> plans = planService.findAllPlans();
         return ResponseEntity.ok(plans);
     }
