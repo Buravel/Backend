@@ -9,4 +9,6 @@ import java.util.List;
 @Transactional(readOnly = true)
 public interface PostTagRepository extends JpaRepository<PostTag,Long> {
     List<PostTag> findAllByPost(Post post);
+
+    void deleteAllByPost(Post beforePost);
 }

@@ -3,6 +3,8 @@ package buravel.buravel.modules.plan;
 import buravel.buravel.modules.account.Account;
 import buravel.buravel.modules.account.AccountRepository;
 import buravel.buravel.modules.account.AccountResponseDto;
+import buravel.buravel.modules.bookmarkPost.BookmarkPost;
+import buravel.buravel.modules.bookmarkPost.BookmarkPostRepository;
 import buravel.buravel.modules.planTag.PlanTag;
 import buravel.buravel.modules.planTag.PlanTagRepository;
 import buravel.buravel.modules.planTag.PlanTagResponseDto;
@@ -21,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +44,7 @@ public class PlanService {
     private final TagRepository tagRepository;
     private final PlanTagRepository planTagRepository;
     private final PostTagRepository postTagRepository;
+    private final BookmarkPostRepository bookmarkPostRepository;
     private final ModelMapper modelMapper;
 
 
@@ -372,6 +376,136 @@ public class PlanService {
         // 금액 검색 o
         Page<Plan> planWithPrice = planRepository.findWithSearchCondContainsPrice(keyword, min, max, pageable);
         return planWithPrice;
+    }
+
+    public Plan updatePlan(PatchPlanRequestDto patchplanRequestDto, Account account) throws NotFoundException {
+        Optional<Plan> foundPlanOptional = planRepository.findById(patchplanRequestDto.getPlanId());
+
+        // 여행 계획이 존재하는지 검증
+        if (foundPlanOptional.isEmpty()) {
+            throw new NotFoundException("여행계획을 찾을 수 없습니다.");
+        }
+        Plan plan = foundPlanOptional.get();
+        Account user = accountRepository.findById(account.getId()).get();
+
+        // 로그인 사용자의 작성글이 맞는지 검증
+        if (!user.equals(plan.getPlanManager())) {
+            throw new AccessDeniedException("해당 기능을 사용할 권한이 없습니다.");
+        }
+
+        //Post, PostTag, Tag 삭제
+        deletePostTags(plan);
+        postRepository.deleteAllByPlanOf(plan);
+
+        //planTag, Tag 삭제
+        deletePlanTags(plan);
+
+        //plan 정보 수정
+        updatePlanInfo(patchplanRequestDto, plan, user);
+
+        //post와 각 포스트들 태그 저장 (postTag)
+        PostDto[][] postDtos = patchplanRequestDto.getPostDtos();
+        generatePosts(plan, postDtos, user);
+
+        // Plan 총 가격/탑3 등 저장
+        settingOutputPlanTotalPrice(plan);
+        settingTop3ListOfPlan(plan);
+
+        return plan;
+    }
+
+    private void deletePlanTags(Plan plan) {
+        List<PlanTag> planTagList = plan.getPlanTagList();
+        for (PlanTag plantag : planTagList) {
+            Tag tag = plantag.getTag();
+            tagRepository.delete(tag);
+            plantag.setTag(null);
+        }
+        plan.getPlanTagList().clear();
+        planTagRepository.deleteAllByPlan(plan);
+    }
+
+    private void deletePostTags(Plan plan) {
+        List<Post> beforePostList = postRepository.findAllByPlanOf(plan);
+        for (Post beforePost : beforePostList) {
+            List<PostTag> postTagList = beforePost.getPostTagList();
+            for (PostTag postTag : postTagList) {
+                Tag tag = postTag.getTag();
+                tagRepository.delete(tag);
+                postTag.setTag(null);
+            }
+            beforePost.setPostTagList(null);
+
+            Optional<BookmarkPost> bookmarkPost = bookmarkPostRepository.findByPost(beforePost);
+            if (!bookmarkPost.isEmpty()) {
+                BookmarkPost find = bookmarkPost.get();
+                beforePost.getBookmarkPosts().remove(find);
+                find.setPost(null);
+            }
+            postTagRepository.deleteAllByPost(beforePost);
+        }
+    }
+
+    private void updatePlanInfo(PatchPlanRequestDto patchplanRequestDto, Plan plan, Account user) {
+        plan.setPlanTitle(patchplanRequestDto.getPlanTitle());
+        plan.setLastModified(LocalDate.now());
+
+        // 업로드한 이미지 저장 or 디폴트 이미지 시 디폴트 이미지 저장
+        if (patchplanRequestDto.getPlanImage() != null) {
+            plan.setPlanImage(patchplanRequestDto.getPlanImage());
+        } else {
+            String defaultPlanImage = imageToDatUri("DefaultPlan");
+            plan.setPlanImage(defaultPlanImage);
+        }
+
+        plan.setPublished(patchplanRequestDto.isPublished());
+        plan.setStartDate(patchplanRequestDto.getStartDate());
+        plan.setEndDate(patchplanRequestDto.getEndDate());
+
+        plan.getTop3List().clear();
+        plan.setTotalPrice(0L);
+        plan.setFlightTotalPrice(0L);
+        plan.setDishTotalPrice(0L);
+        plan.setDishTotalPrice(0L);
+        plan.setShoppingTotalPrice(0L);
+        plan.setHotelTotalPrice(0L);
+        plan.setTrafficTotalPrice(0L);
+        plan.setEtcTotalPrice(0L);
+
+        // 플랜태그 저장
+        String planTag = patchplanRequestDto.getPlanTag();
+        generatePlanTags(plan, planTag);
+    }
+
+    public PatchPlanResponseDto updatePlanResponse(Plan plan) {
+        PatchPlanResponseDto planResponseDto = modelMapper.map(plan, PatchPlanResponseDto.class);
+
+        List<PlanTag> list = plan.getPlanTagList();
+        for (PlanTag planTag : list) {
+            PlanTagResponseDto planTagResponseDto = createPlanTagResponseDto(planTag);
+            planResponseDto.getPlanTagResponseDtos().add(planTagResponseDto);
+        }
+
+        List<Post> posts = postRepository.findAllByPlanOf(plan);
+        for (Post post : posts) {
+            PatchPostReponseDto patchPostReponseDto = modelMapper.map(post, PatchPostReponseDto.class);
+            List<PostTag> postTags = post.getPostTagList();
+            List<PostTagResponseDto> lists = new ArrayList<>();
+            for (PostTag tag : postTags) {
+                PostTagResponseDto postTagDto = patchPostTagResponseDto(tag);
+                lists.add(postTagDto);
+                patchPostReponseDto.getPostTagList().add(postTagDto);
+            }
+            patchPostReponseDto.setPostTagList(lists);
+            planResponseDto.getPostResponseDtos().add(patchPostReponseDto);
+        }
+        return planResponseDto;
+    }
+
+    private PostTagResponseDto patchPostTagResponseDto(PostTag postTag) {
+        PostTagResponseDto responseDto = new PostTagResponseDto();
+        responseDto.setPostTagTitle(postTag.getTag().getTagTitle());
+        return responseDto;
     }
 }
 
