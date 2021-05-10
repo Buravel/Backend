@@ -518,8 +518,8 @@ public class PlanService {
 
         //플랜 작성자가 로그인 유저인지 검증
         Account user = accountRepository.findById(account.getId()).get();
-        if (plan.getPlanManager().getId() != user.getId()) {
-            throw new NotFoundException("해당 여행계획의 작성자가 아닙니다.");
+        if (!plan.getPlanManager().equals(user)) {
+            throw new AccessDeniedException("작성자만 삭제할 수 있습니다.");
         }
 
         //Post, PostTag, Tag 삭제
