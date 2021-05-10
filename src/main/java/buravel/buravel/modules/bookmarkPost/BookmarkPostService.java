@@ -66,12 +66,51 @@ public class BookmarkPostService {
         return dto;
     }
 
-    public BookmarkPostResponseDto addBookmarkPosts(Long bookmarkId, Long postId){
-        BookmarkPostResponseDto bookmarkPostResponseDto = new BookmarkPostResponseDto();
+    public BookmarkPostResponseDto processAddBookmarkPosts(Long bookmarkId, Long postId) throws NotFoundException{
 
-        return bookmarkPostResponseDto;
+        Optional<Bookmark> bookmarkEntity = bookmarkRepository.findById(bookmarkId);
+        if(bookmarkEntity.isEmpty()){
+            throw new NotFoundException("해당 북마크가 없습니다.");
+        }
+
+        Optional<Post> postEntity = postRepository.findById(postId);
+        if(postEntity.isEmpty()){
+            throw new NotFoundException("해당 포스트가 존재하지 않습니다.");
+        }
+        // todo: 검사가 반복되는거같은데, 일단 기능 구현 후 나중에 리팩토링
+
+        Bookmark bookmark = bookmarkEntity.get();
+        Post post = postEntity.get();
+
+        if(bookmarkPostRepository.findByBookmarkAndPost(bookmark, post) != null){
+            return null;
+        } // 중복 post 존재
+
+        BookmarkPost bookmarkPost = addBookmarkPost(bookmark, post);
+
+        return createBookmarkPostResponseDto(bookmarkPost);
     }
 
+    public BookmarkPost addBookmarkPost(Bookmark bookmark, Post post){
+        BookmarkPost bookmarkPost = createBookmarkPost(bookmark, post);
+        BookmarkPost saved = bookmarkPostRepository.save(bookmarkPost);
+        // 양방향 save
+        bookmark.getBookmarkPosts().add(saved);
+        post.getBookmarkPosts().add(saved);
+
+        return saved;
+    }
+
+    public BookmarkPost createBookmarkPost(Bookmark bookmark, Post post){
+        BookmarkPost bookmarkPost = new BookmarkPost();
+
+        bookmarkPost.setBookmark(bookmark);
+        bookmarkPost.setPost(post);
+        bookmarkPost.setChecked(false);
+
+        return bookmarkPost;
+    }
+    
     public boolean processDeleteBookmarkPost(Long bookmarkPostId) throws NotFoundException{
         Optional<BookmarkPost> bookmarkPostEntity = bookmarkPostRepository.findById(bookmarkPostId);
         if(bookmarkPostEntity.isEmpty()){
