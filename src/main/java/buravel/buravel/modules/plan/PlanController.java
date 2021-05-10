@@ -16,7 +16,9 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
@@ -81,6 +83,18 @@ public class PlanController {
         PatchPlanResponseDto planResponseDto = planService.updatePlanResponse(plan);
         EntityModel<PatchPlanResponseDto> resultResource = EntityModel.of(planResponseDto);
         resultResource.add(linkTo(PlanController.class).withSelfRel());
+        return ResponseEntity.ok().body(resultResource);
+    }
+
+    @DeleteMapping("/{planId}")
+    public ResponseEntity deletePlan(@PathVariable Long planId, @CurrentUser Account account) throws NotFoundException  {
+        planService.deletePlan(planId, account);
+
+        Map<String, String> resultMap = new HashMap<>();
+        resultMap.put("message", "성공적으로 삭제되었습니다.");
+        EntityModel resultResource = EntityModel.of(resultMap);
+        resultResource.add(linkTo(PlanController.class).withSelfRel());
+
         return ResponseEntity.ok().body(resultResource);
     }
 }

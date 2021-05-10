@@ -507,6 +507,28 @@ public class PlanService {
         responseDto.setPostTagTitle(postTag.getTag().getTagTitle());
         return responseDto;
     }
-}
 
+    public void deletePlan(Long planId, Account account) throws NotFoundException {
+        // 플랜 존재 검증
+        Optional<Plan> postOptional = planRepository.findById(planId);
+        if (postOptional.isEmpty()) {
+            throw new NotFoundException("해당 여행계획이 존재하지 않습니다.");
+        }
+        Plan plan = postOptional.get();
+
+        //플랜 작성자가 로그인 유저인지 검증
+        Account user = accountRepository.findById(account.getId()).get();
+        if (plan.getPlanManager().getId() != user.getId()) {
+            throw new NotFoundException("해당 여행계획의 작성자가 아닙니다.");
+        }
+
+        //Post, PostTag, Tag 삭제
+        deletePostTags(plan);
+        postRepository.deleteAllByPlanOf(plan);
+
+        //Plan, planTag, Tag 삭제
+        deletePlanTags(plan);
+        planRepository.delete(plan);
+    }
+}
   
