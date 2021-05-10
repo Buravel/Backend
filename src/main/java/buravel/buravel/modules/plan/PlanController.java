@@ -3,6 +3,7 @@ package buravel.buravel.modules.plan;
 import buravel.buravel.modules.account.Account;
 import buravel.buravel.modules.account.CurrentUser;
 import buravel.buravel.modules.errors.ErrorResource;
+import buravel.buravel.modules.plan.validator.PatchPlanValidator;
 import buravel.buravel.modules.plan.validator.PlanValidator;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+
 @RestController
 @RequestMapping("/plans")
 @RequiredArgsConstructor
@@ -24,7 +27,7 @@ public class PlanController {
 
     private final PlanService planService;
     private final PlanValidator planValidator;
-
+    private final PatchPlanValidator patchPlanValidator;
 
     @PostMapping
     public ResponseEntity createPlan(@RequestBody @Valid PlanDto planDto, @CurrentUser Account account, Errors errors) {
@@ -55,6 +58,30 @@ public class PlanController {
     public ResponseEntity getPlan(@PathVariable Long id) throws NotFoundException {
         EntityModel<PlanWithPostResponseDto> result = planService.getPlanWithPlanId(id);
         return ResponseEntity.ok(result);
+    }
+
+    @PatchMapping("")
+    public ResponseEntity updatePlan(@RequestBody @Valid PatchPlanRequestDto patchplanRequestDto, @CurrentUser Account account, Errors errors) throws NotFoundException  {
+        // request 에러 체크
+        if (errors.hasErrors()) {
+            EntityModel<Errors> jsr303 = ErrorResource.of(errors);
+            return ResponseEntity.badRequest().body(jsr303);
+        }
+
+        // 여행 날짜 request 체크
+        patchPlanValidator.validate(patchplanRequestDto,errors);
+        if (errors.hasErrors()) {
+            EntityModel<Errors> customError = ErrorResource.of(errors);
+            return ResponseEntity.badRequest().body(customError);
+        }
+
+        // 플랜 업데이트
+        Plan plan = planService.updatePlan(patchplanRequestDto, account);
+
+        PatchPlanResponseDto planResponseDto = planService.updatePlanResponse(plan);
+        EntityModel<PatchPlanResponseDto> resultResource = EntityModel.of(planResponseDto);
+        resultResource.add(linkTo(PlanController.class).withSelfRel());
+        return ResponseEntity.ok().body(resultResource);
     }
 }
 
