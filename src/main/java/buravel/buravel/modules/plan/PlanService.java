@@ -17,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.stereotype.Service;
@@ -359,6 +361,17 @@ public class PlanService {
             map.getPostTagResponseDtoList().add(postTagResponseDto);
         }
         return map;
+    }
+
+    public Page<Plan> search(String keyword, long min, long max, Pageable pageable) {
+        // 금액 검색 x
+        if (max == 0) {
+            Page<Plan> plan = planRepository.findWithSearchCond(keyword,pageable);
+            return plan;
+        }
+        // 금액 검색 o
+        Page<Plan> planWithPrice = planRepository.findWithSearchCondContainsPrice(keyword, min, max, pageable);
+        return planWithPrice;
     }
 }
 

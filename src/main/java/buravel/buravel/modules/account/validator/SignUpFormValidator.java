@@ -22,7 +22,7 @@ public class SignUpFormValidator implements Validator {
     public void validate(Object object, Errors errors) {
         AccountDto form = (AccountDto) object;
         if (accountRepository.existsByUsername(form.getUsername())) {
-            errors.rejectValue("username", "invalid username", new Object[]{form.getUsername()}, "이미 사용중인 닉네임입니다.");
+            errors.rejectValue("username", "invalid username", new Object[]{form.getUsername()}, "이미 사용중인 아이디입니다.");
         }
         if (accountRepository.existsByEmail(form.getEmail())) {
             errors.rejectValue("email","invalid email",new Object[]{form.getEmail()},"이미 사용중인 이메일입니다.");
