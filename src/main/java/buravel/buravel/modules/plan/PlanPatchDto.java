@@ -1,22 +1,22 @@
 package buravel.buravel.modules.plan;
 
+
 import buravel.buravel.modules.post.PostDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Column;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
-
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PlanDto {
+public class PlanPatchDto {
+
+    private Long id;
 
     @NotBlank
     private String planTitle;
@@ -33,3 +33,4 @@ public class PlanDto {
 
     private PostDto[][] postDtos;
 }
+

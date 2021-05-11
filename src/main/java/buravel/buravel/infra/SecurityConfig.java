@@ -37,7 +37,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilter(new JwtAuthorizationFilter(authenticationManager(), accountRepository))
                 .authorizeRequests()
 
-                .mvcMatchers("/signUp", "/login", "/", "/tempPassword", "/findUsername").permitAll()
+                .mvcMatchers("/signUp", "/login", "/", "/tempPassword", "/findUsername","/search").permitAll()
                 .mvcMatchers(HttpMethod.GET, "/plans","/plans/{id}").permitAll()
 
                 .anyRequest().authenticated();
