@@ -82,7 +82,7 @@ public class BookmarkPostService {
         Bookmark bookmark = bookmarkEntity.get();
         Post post = postEntity.get();
 
-        if(bookmarkPostRepository.findByBookmarkAndPost(bookmark, post) != null){
+        if(bookmarkPostRepository.existsByBookmarkAndPostAndChecked(bookmark, post, false)){
             return null;
         } // 중복 post 존재
 

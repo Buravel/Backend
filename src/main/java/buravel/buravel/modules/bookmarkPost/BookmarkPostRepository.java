@@ -11,6 +11,6 @@ import java.util.List;
 public interface BookmarkPostRepository extends JpaRepository<BookmarkPost,Long> {
 
     List<BookmarkPost> findByBookmarkAndChecked(Bookmark bookmark, boolean checked);
-    BookmarkPost findByBookmarkAndPost(Bookmark bookmark, Post post);
+    boolean existsByBookmarkAndPostAndChecked(Bookmark bookmark, Post post, boolean checked);
     // todo: spring data jpa
 }
