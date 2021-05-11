@@ -166,6 +166,9 @@ public class BookmarkPostService {
         bookmarkPostRepository.deleteAllByPlanOf(plan); // 기존 매핑 삭제
 
         for(BookmarkPost bookmarkPost : bookmarkPostList){
+            if(bookmarkPostRepository.existsByPlanOfAndPostAndChecked(plan, bookmarkPost.getPost(), true))
+                continue;
+
             BookmarkPost newOne = createBookmarkPost(bookmarkPost.getBookmark(), bookmarkPost.getPost());
             newOne.setChecked(true);
             newOne.setPlanOf(plan);
