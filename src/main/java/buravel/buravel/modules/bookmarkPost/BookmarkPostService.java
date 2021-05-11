@@ -2,6 +2,8 @@ package buravel.buravel.modules.bookmarkPost;
 
 import buravel.buravel.modules.bookmark.Bookmark;
 import buravel.buravel.modules.bookmark.BookmarkRepository;
+import buravel.buravel.modules.plan.Plan;
+import buravel.buravel.modules.plan.PlanRepository;
 import buravel.buravel.modules.post.Post;
 import buravel.buravel.modules.post.PostRepository;
 import javassist.NotFoundException;
@@ -23,6 +25,7 @@ public class BookmarkPostService {
     private final BookmarkPostRepository bookmarkPostRepository;
     private final BookmarkRepository bookmarkRepository;
     private final PostRepository postRepository;
+    private final PlanRepository planRepository;
     private final ModelMapper modelMapper;
 
     public List<BookmarkPostResponseDto> getBookmarkPosts(Long bookmarkId) throws NotFoundException{
@@ -139,6 +142,36 @@ public class BookmarkPostService {
 
         bookmarkPostRepository.deleteById(bookmarkPost.getId());
         return true;
+    }
+
+    public CheckResponseDto checkBookmarkPosts(CheckRequestDto checkRequestDto){
+        return null;
+    }
+
+    public CheckResponseDto getCheckedBookmarkPosts(Long planId) throws NotFoundException{
+        Optional<Plan> planEntity = planRepository.findById(planId);
+        if(planEntity.isEmpty()){
+            throw new NotFoundException("해당 플랜이 존재하지 않습니다.");
+        } // 해당 플랜 없음
+
+        Plan plan = planEntity.get();
+        List<BookmarkPost> bookmarkPostList = bookmarkPostRepository.findByPlanOfAndChecked(plan, true);
+
+        return createCheckResponseDto(bookmarkPostList, planId);
+    }
+
+    public CheckResponseDto createCheckResponseDto(List<BookmarkPost> bookmarkPostList, Long planId){
+        List<BookmarkPostResponseDto> bookmarkPostResponseDtos = new ArrayList<>();
+        CheckResponseDto checkResponseDto = new CheckResponseDto();
+
+        for(BookmarkPost bookmarkPost : bookmarkPostList){
+            bookmarkPostResponseDtos.add(createBookmarkPostResponseDto(bookmarkPost));
+        }
+
+        checkResponseDto.setPlanId(planId);
+        checkResponseDto.setBookmarkPostResponseDtoList(bookmarkPostResponseDtos);
+
+        return checkResponseDto;
     }
     
 }

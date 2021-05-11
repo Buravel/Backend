@@ -7,9 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,5 +60,23 @@ public class BookmarkPostController {
         }
 
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/bookmark/post/checking")
+    public ResponseEntity saveCheckingBookmarkPost(@RequestBody @Valid CheckRequestDto checkRequestDto,
+                                                   @CurrentUser Account account) throws NotFoundException {
+        CheckResponseDto checkResponseDto = bookmarkPostService.checkBookmarkPosts(checkRequestDto);
+
+        EntityModel<CheckResponseDto> checkResource = CheckResource.modelOf(checkResponseDto);
+        return ResponseEntity.ok(checkResource);
+    }
+
+    @GetMapping("/bookmark/post/{planId}/checking")
+    public ResponseEntity getCheckingBookmarkPost(@PathVariable(value = "planId") Long planId,
+                                                  @CurrentUser Account account) throws NotFoundException {
+        CheckResponseDto checkResponseDto = bookmarkPostService.getCheckedBookmarkPosts(planId);
+
+        EntityModel<CheckResponseDto> checkResource = CheckResource.modelOf(checkResponseDto);
+        return ResponseEntity.ok(checkResource);
     }
 }
