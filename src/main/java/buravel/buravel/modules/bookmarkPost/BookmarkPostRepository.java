@@ -1,6 +1,7 @@
 package buravel.buravel.modules.bookmarkPost;
 
 import buravel.buravel.modules.bookmark.Bookmark;
+import buravel.buravel.modules.plan.Plan;
 import buravel.buravel.modules.post.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,7 +13,10 @@ import java.util.Optional;
 public interface BookmarkPostRepository extends JpaRepository<BookmarkPost,Long> {
 
     List<BookmarkPost> findByBookmarkAndChecked(Bookmark bookmark, boolean checked);
-    BookmarkPost findByBookmarkAndPost(Bookmark bookmark, Post post);
+    boolean existsByBookmarkAndPostAndChecked(Bookmark bookmark, Post post, boolean checked);
+    List<BookmarkPost> findByPlanOfAndChecked(Plan plan, boolean checked);
+    void deleteAllByPlanOf(Plan plan);
+    boolean existsByPlanOfAndPostAndChecked(Plan plan, Post post, boolean checked);
     // todo: spring data jpa
     Optional<BookmarkPost> findByPost(Post beforePost);
 }
