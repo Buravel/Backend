@@ -97,6 +97,21 @@ class PlanControllerTest {
     }
 
     @Test
+    @DisplayName("여행 계획 작성 - 실패(여행 시작날짜가 더 빠를 수 없다.)")
+    void createPlan_fail() throws Exception {
+        String token = getAccessToken();
+        //login하면서 security context holder에 사용자 인증정보 추가했고
+        mockMvc.perform(post("/plans")
+                .header(HttpHeaders.AUTHORIZATION, token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON)
+                .content(objectMapper.writeValueAsString(createWrongPlanDto())))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("errors[0].defaultMessage").exists())
+                .andDo(print());
+    }
+
+    @Test
     @DisplayName("단일 여행 계획 조회")
     void getPlan() throws Exception {
         String token = getAccessToken();
@@ -121,6 +136,21 @@ class PlanControllerTest {
         //planTag 2개 만들어진다
         assertThat(planTagRepository.count()).isEqualTo(2);
     }
+    @Test
+    @DisplayName("단일 여행 계획 조회 실패")
+    void getPlan_fail() throws Exception {
+        String token = getAccessToken();
+        //login하면서 security context holder에 사용자 인증정보 추가했고
+        mockMvc.perform(post("/plans")
+                .header(HttpHeaders.AUTHORIZATION, token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON)
+                .content(objectMapper.writeValueAsString(createPlanDto())));
+        // 조회
+        mockMvc.perform(get("/plans/{id}", 10000))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
 
 
     public PlanDto createPlanDto() {
@@ -129,6 +159,16 @@ class PlanControllerTest {
         planDto.setPublished(false);
         planDto.setStartDate(LocalDate.now());
         planDto.setEndDate(LocalDate.now().plusDays(1));
+        planDto.setPlanTag("spring,java");
+        planDto.setPostDtos(createPostDtos());
+        return planDto;
+    }
+    public PlanDto createWrongPlanDto() {
+        PlanDto planDto = new PlanDto();
+        planDto.setPlanTitle("test");
+        planDto.setPublished(false);
+        planDto.setStartDate(LocalDate.now());
+        planDto.setEndDate(LocalDate.now().minusDays(1));
         planDto.setPlanTag("spring,java");
         planDto.setPostDtos(createPostDtos());
         return planDto;

@@ -18,8 +18,7 @@ public class PlanValidator implements Validator {
     @Override
     public void validate(Object target, Errors errors) {
         PlanDto tar = (PlanDto) target;
-        if (tar.getEndDate().isBefore(tar.getStartDate())
-        || tar.getEndDate().equals(tar.getStartDate())) {
+        if (tar.getEndDate().isBefore(tar.getStartDate())) {
             errors.rejectValue("endDate", "invalid endDate", new Object[]{tar.getEndDate()}, "여행 종료 시간을 확인해주세요.");
         }
     }
