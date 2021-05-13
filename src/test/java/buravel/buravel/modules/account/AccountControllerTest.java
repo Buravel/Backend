@@ -118,7 +118,7 @@ class AccountControllerTest {
         Account user = accountRepository.findByUsername("kiseok");
         String emailCheckToken = user.getEmailCheckToken();
         mockMvc.perform(post("/emailVerification")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .header(HttpHeaders.AUTHORIZATION, token)
                 .param("token", emailCheckToken))
                 .andExpect(status().isOk());
     }
@@ -134,7 +134,6 @@ class AccountControllerTest {
         ResultActions perform = mockMvc.perform(post("/login")
                 .content(objectMapper.writeValueAsString(accountDto)));
         String token = perform.andReturn().getResponse().getHeader("Authorization");
-        token = token.substring(7, token.length());
         return token;
     }
 }
