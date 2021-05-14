@@ -530,5 +530,11 @@ public class PlanService {
         deletePlanTags(plan);
         planRepository.delete(plan);
     }
+
+    public Page<Plan> getMyClosedPlans(Account account, Pageable pageable) {
+        Account user = accountRepository.findByUsername(account.getUsername());
+        Page<Plan> plans = planRepository.findByPlanManagerAndPublished(user, false,pageable);
+        return plans;
+    }
 }
   
