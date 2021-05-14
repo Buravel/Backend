@@ -7,10 +7,14 @@ import buravel.buravel.modules.plan.validator.PatchPlanValidator;
 import buravel.buravel.modules.plan.validator.PlanValidator;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
@@ -57,6 +61,16 @@ public class PlanController {
         return ResponseEntity.ok(plans);
     }
 
+    @GetMapping("/mine/closed")
+    public ResponseEntity getMyClosedPlans(@CurrentUser Account account, @PageableDefault(size = 5, sort = "lastModified",
+            direction = Sort.Direction.DESC) Pageable pageable, PagedResourcesAssembler<Plan> assembler) {
+        Page<Plan> plans =  planService.getMyClosedPlans(account, pageable);
+        PagedModel<EntityModel<PlanResponseDto>> entityModels =
+                assembler.toModel(plans, p -> PlanResource.modelOf(planService.createPlanResponse(p.getPlanManager(), p)));
+        return ResponseEntity.ok(entityModels);
+    }
+
+
     @GetMapping("/{id}")
     public ResponseEntity getPlan(@PathVariable Long id) throws NotFoundException {
         if (!planRepository.existsById(id)) {
@@ -66,7 +80,7 @@ public class PlanController {
         return ResponseEntity.ok(result);
     }
 
-    @PatchMapping("")
+    @PatchMapping
     public ResponseEntity updatePlan(@RequestBody @Valid PatchPlanRequestDto patchplanRequestDto, @CurrentUser Account account, Errors errors) throws NotFoundException  {
         // request 에러 체크
         if (errors.hasErrors()) {
