@@ -106,7 +106,9 @@ class IndexControllerTest {
                 .andExpect(jsonPath("_links").exists())
                 .andExpect(jsonPath("_links.first").exists())
                 .andExpect(jsonPath("_links.last").exists())
-                .andExpect(jsonPath("page").exists());
+                .andExpect(jsonPath("page").exists())
+                .andExpect(jsonPath("page.totalElements").value("11"))
+                .andExpect(jsonPath("page.totalPages").value("2"));
 
         assertThat(planRepository.count()).isEqualTo(11);
         assertThat(postRepository.count()).isEqualTo(44);
@@ -141,8 +143,38 @@ class IndexControllerTest {
                 // 해당 가격 범위에 해당하는 plan은 단 1개
                 .andExpect(jsonPath("_embedded.planResponseDtoList[1].id").doesNotExist())
                 .andExpect(jsonPath("_links").exists())
-                .andExpect(jsonPath("page").exists());
+                .andExpect(jsonPath("page").exists())
+                .andExpect(jsonPath("page.totalElements").value("1"))
+                .andExpect(jsonPath("page.totalPages").value("1"));
+    }
 
+    @Test
+    @DisplayName("검색 - 조건 없는 검색은 plan 전체 조회를 대체할 수 있다.")
+    void searchWithoutCond() throws Exception{
+        setting();
+        mockMvc.perform(get("/search")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON)
+                //공개된!!! 애들 plan->published true
+                .param("keyword", "")
+                .param("min", "0")
+                .param("max", "0"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("_embedded.planResponseDtoList").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0].id").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0].accountResponseDto").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0].planTagResponseDtos").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links").exists())
+                .andExpect(jsonPath("_links").exists())
+                .andExpect(jsonPath("_links.first").exists())
+                .andExpect(jsonPath("_links.last").exists())
+                .andExpect(jsonPath("page").exists())
+                .andExpect(jsonPath("page.totalElements").value("11"))
+                .andExpect(jsonPath("page.totalPages").value("2"));
+
+        assertThat(planRepository.count()).isEqualTo(11);
+        assertThat(postRepository.count()).isEqualTo(44);
     }
 
     private void setting() throws Exception {

@@ -45,11 +45,7 @@ public class AccountService implements UserDetailsService {
         return new UserAccount(account);
     }
 
-    public void sendTempPassword(String email) {
-        Account account = accountRepository.findByEmail(email);
-        if (account == null) {
-            throw new UsernameNotFoundException(email);
-        }
+    public void sendTempPassword(Account account) {
         if (!account.isEmailVerified()) {
             throw new AccessDeniedException("이메일 인증된 회원만 가능합니다.");
         }
@@ -94,14 +90,8 @@ public class AccountService implements UserDetailsService {
         emailService.sendEmail(build);
     }
 
-    public void completeSignUp(Account account) {
-        Optional<Account> byId = accountRepository.findById(account.getId());
-        Account find = byId.get();
-        if (find != null) {
-            find.completeSignUp();
-        } else {
-            throw new UsernameNotFoundException(account.getUsername());
-        }
+    public void completeSignUp(Account find) {
+        find.completeSignUp();
     }
 
     public void reSendEmailCheckToken(Account account) {
