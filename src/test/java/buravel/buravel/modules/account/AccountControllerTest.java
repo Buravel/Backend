@@ -114,6 +114,26 @@ class AccountControllerTest {
     }
 
     @Test
+    @DisplayName("로그인 실패")
+    void login_fail() throws Exception {
+        Account account = new Account();
+        account.setUsername("kiseok");
+        account.setEmail("kisa0828@naver.com");
+        account.setPassword(passwordEncoder.encode("123456789"));
+        account.setNickname("hello");
+
+        accountRepository.save(account);
+
+        AccountDto accountDto = new AccountDto();
+        accountDto.setUsername("kiseok");
+        accountDto.setPassword("12345678");
+
+        mockMvc.perform(post("/login")
+                .content(objectMapper.writeValueAsString(accountDto)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     @DisplayName("임시 비밀번호 발급")
     void getTempPassword()throws Exception {
         AccountDto accountDto = new AccountDto();
@@ -145,6 +165,13 @@ class AccountControllerTest {
         mockMvc.perform(post("/tempPassword")
                 .param("email", "kisa0828@naver.com"))
                 .andExpect(status().isForbidden());
+    }
+    @Test
+    @DisplayName("임시 비밀번호 발급 에러 - 회원 가입된 이메일만 사용가능")
+    void getTempPassword_wrong_withoutSignUp() throws Exception {
+        mockMvc.perform(post("/tempPassword")
+                .param("email", "hello@naver.com"))
+                .andExpect(status().isNotFound());
     }
 
     @Test
