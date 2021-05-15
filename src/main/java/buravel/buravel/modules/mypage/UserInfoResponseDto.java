@@ -19,4 +19,5 @@ public class UserInfoResponseDto {
     private String profileImage;
     @Email
     private String email;
+    private boolean emailVerified;
 }

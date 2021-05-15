@@ -4,12 +4,12 @@ import buravel.buravel.modules.account.Account;
 import buravel.buravel.modules.account.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.Base64;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -18,6 +18,7 @@ public class MypageService {
 
     private final AccountRepository accountRepository;
     private final ModelMapper modelMapper;
+    private final PasswordEncoder passwordEncoder;
 
     public UserInfoResponseDto updateUserPicture(PictureRequestDto pictureRequestDto, Account account){
         String image = pictureRequestDto.getProfileImage();
@@ -50,5 +51,24 @@ public class MypageService {
         UserInfoResponseDto user = modelMapper.map(account, UserInfoResponseDto.class);
 
         return user;
+    }
+
+    public UserInfoResponseDto getUserInfo(Account account) {
+        Account user = accountRepository.findById(account.getId()).get();
+        return generateUserInfoResponseDto(user);
+    }
+
+    public UserInfoResponseDto updateUser(Account account, UserRequestDto userRequestDto) {
+        Account user = accountRepository.findById(account.getId()).get();
+        // 닉네임 변경
+        if (!userRequestDto.getNickname().equals(user.getNickname())) {
+            user.setNickname(userRequestDto.getNickname());
+        }
+        // 비밀번호 변경
+        if (!userRequestDto.getPassword().equals("")) {
+            user.setPassword(passwordEncoder.encode(userRequestDto.getPassword()));
+        }
+
+        return generateUserInfoResponseDto(user);
     }
 }
