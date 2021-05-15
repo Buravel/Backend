@@ -103,10 +103,11 @@ public class PlanService {
         Long price = plan.getTotalPrice();
         if (price < 10000) {
             plan.setOutputPlanTotalPrice(price + "원");
+        } else {
+            String string = price.toString();
+            string = string.substring(0, string.length()-4);
+            plan.setOutputPlanTotalPrice(string+"만원");
         }
-        String string = price.toString();
-        string = string.substring(0, string.length()-4);
-        plan.setOutputPlanTotalPrice(string+"만원");
     }
 
 
@@ -335,7 +336,6 @@ public class PlanService {
         }
         EntityModel<PlanWithPostResponseDto> result = PlanWithPostResource.modelOf(ppdto);
         return result;
-        //todo 카테고리 어떻게 응답으로 나오는지 보기
     }
 
     private PlanWithPostResponseDto createPlanWithPostResponseDto(Plan plan) {
@@ -529,6 +529,12 @@ public class PlanService {
         //Plan, planTag, Tag 삭제
         deletePlanTags(plan);
         planRepository.delete(plan);
+    }
+
+    public Page<Plan> getMyClosedPlans(Account account, Pageable pageable) {
+        Account user = accountRepository.findByUsername(account.getUsername());
+        Page<Plan> plans = planRepository.findByPlanManagerAndPublished(user, false,pageable);
+        return plans;
     }
 }
   

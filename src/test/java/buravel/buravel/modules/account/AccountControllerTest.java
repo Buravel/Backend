@@ -23,8 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @Transactional
@@ -70,6 +69,28 @@ class AccountControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk());
     }
+    @Test
+    @DisplayName("회원가입 에러")
+    void signUp_wrong() throws Exception {
+        Account kiseok = Account.builder()
+                .username("kiseok")
+                .password(passwordEncoder.encode("123456789"))
+                .email("kisa0828@naver.com")
+                .build();
+        accountRepository.save(kiseok);
+
+        AccountDto accountDto = new AccountDto();
+        accountDto.setUsername("kiseok");
+        accountDto.setPassword("123456789");
+        accountDto.setEmail("kisa0828@naver.com");
+        accountDto.setNickname("hello");
+
+        mockMvc.perform(post("/signUp")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(accountDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("errors").exists());
+    }
 
     @Test
     @DisplayName("로그인 정상")
@@ -93,8 +114,28 @@ class AccountControllerTest {
     }
 
     @Test
+    @DisplayName("로그인 실패")
+    void login_fail() throws Exception {
+        Account account = new Account();
+        account.setUsername("kiseok");
+        account.setEmail("kisa0828@naver.com");
+        account.setPassword(passwordEncoder.encode("123456789"));
+        account.setNickname("hello");
+
+        accountRepository.save(account);
+
+        AccountDto accountDto = new AccountDto();
+        accountDto.setUsername("kiseok");
+        accountDto.setPassword("12345678");
+
+        mockMvc.perform(post("/login")
+                .content(objectMapper.writeValueAsString(accountDto)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     @DisplayName("임시 비밀번호 발급")
-    void loginWithTempPassword()throws Exception {
+    void getTempPassword()throws Exception {
         AccountDto accountDto = new AccountDto();
         accountDto.setUsername("kiseok");
         accountDto.setEmail("kisa0828@naver.com");
@@ -110,6 +151,28 @@ class AccountControllerTest {
         assertThat(user.getPassword().matches("123456789")).isFalse();
 
     }
+    @Test
+    @DisplayName("임시 비밀번호 발급 에러 - 이메일 인증을 한 회원만 가능")
+    void getTempPassword_wrong() throws Exception {
+        AccountDto accountDto = new AccountDto();
+        accountDto.setUsername("kiseok");
+        accountDto.setEmail("kisa0828@naver.com");
+        accountDto.setPassword("123456789");
+        accountDto.setNickname("hello");
+        Account account = accountService.processNewAccount(accountDto);
+        account.setEmailVerified(false);
+
+        mockMvc.perform(post("/tempPassword")
+                .param("email", "kisa0828@naver.com"))
+                .andExpect(status().isForbidden());
+    }
+    @Test
+    @DisplayName("임시 비밀번호 발급 에러 - 회원 가입된 이메일만 사용가능")
+    void getTempPassword_wrong_withoutSignUp() throws Exception {
+        mockMvc.perform(post("/tempPassword")
+                .param("email", "hello@naver.com"))
+                .andExpect(status().isNotFound());
+    }
 
     @Test
     @DisplayName("이메일 인증 성공")
@@ -118,9 +181,21 @@ class AccountControllerTest {
         Account user = accountRepository.findByUsername("kiseok");
         String emailCheckToken = user.getEmailCheckToken();
         mockMvc.perform(post("/emailVerification")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .header(HttpHeaders.AUTHORIZATION, token)
                 .param("token", emailCheckToken))
                 .andExpect(status().isOk());
+    }
+    @Test
+    @DisplayName("이메일 인증 실패")
+    void emailVerification_fail()throws Exception {
+        String token = getAccessToken();
+        Account user = accountRepository.findByUsername("kiseok");
+        String emailCheckToken = user.getEmailCheckToken();
+        mockMvc.perform(post("/emailVerification")
+                .header(HttpHeaders.AUTHORIZATION, token)
+                .param("token", emailCheckToken+"error"))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
     }
 
     private String getAccessToken() throws Exception {
@@ -134,7 +209,6 @@ class AccountControllerTest {
         ResultActions perform = mockMvc.perform(post("/login")
                 .content(objectMapper.writeValueAsString(accountDto)));
         String token = perform.andReturn().getResponse().getHeader("Authorization");
-        token = token.substring(7, token.length());
         return token;
     }
 }

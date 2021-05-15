@@ -20,7 +20,7 @@ public class BookmarkValidatior implements Validator {
         UserBookmarkDto userbookmarkDto = (UserBookmarkDto) target;
         Account account = userbookmarkDto.getAccount();
         String bookmarkTitle = userbookmarkDto.getBookmarkDto().getBookmarkTitle();
-        Bookmark bookmark =  bookmarkRepository.findByBookmarkTitleAndBookmarkManager_Id(bookmarkTitle, account.getId());
+        Bookmark bookmark =  bookmarkRepository.findByBookmarkTitleAndBookmarkManager(bookmarkTitle, account);
         if (bookmark != null) {
             errors.rejectValue("bookmarkTitle", "wrongValue", "there is already same named bookmark");
         }

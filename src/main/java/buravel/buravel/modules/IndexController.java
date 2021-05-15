@@ -43,6 +43,4 @@ public class IndexController {
                 assembler.toModel(plan, p -> PlanResource.modelOf(planService.createPlanResponse(p.getPlanManager(), p)));
         return ResponseEntity.ok(result);
     }
-
-    //todo sort / dir 적용해야한다.
 }
