@@ -7,6 +7,7 @@ import buravel.buravel.modules.post.PostDto;
 import buravel.buravel.modules.post.PostRepository;
 import buravel.buravel.modules.postTag.PostTagRepository;
 import buravel.buravel.modules.tag.TagRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Profile;
+import org.springframework.data.domain.Page;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -28,6 +31,8 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -68,7 +73,11 @@ class PlanControllerTest {
     @Autowired
     TagRepository tagRepository;
 
-
+/**
+ * 현재 create-drop으로 설정했기 때문에 시작 시 drop을 먼저한다. 그러나 application.properties에서 사용하는 db는
+ * 실행시킨적이 없고 테이블이 구성되어있지 않아서 - drop table if exists를 먼저 수행 이 후 create해서 테이블 생성 후 테스트
+ * 그래서 application.properties에서 buravel db를 사용하지 않고 dialect설정 추가로 플랫폼 지정
+ * */
     @BeforeEach
     public void setUp() {
         tagRepository.deleteAll();
@@ -152,10 +161,91 @@ class PlanControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    @DisplayName("내 비공개 여행 계획 조회")
+    void getMyClosedPlans()throws Exception {
+        String token = setting(false);
 
-    public PlanDto createPlanDto() {
+        mockMvc.perform(get("/plans/mine/closed")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON)
+                .header(HttpHeaders.AUTHORIZATION, token))
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0].accountResponseDto.username").value("kiseok"))
+                .andExpect(jsonPath("_embedded.planResponseDtoList[4].accountResponseDto.username").value("kiseok"))
+                .andExpect(jsonPath("_embedded.planResponseDtoList[4]").exists()) // 페이지당 5개
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0].published").value(false))
+                .andExpect(jsonPath("_embedded.planResponseDtoList[4].published").value(false))
+                .andExpect(jsonPath("_links").exists())
+                .andExpect(jsonPath("page.size").value(5))
+                .andExpect(jsonPath("page.totalElements").value(11))
+                .andExpect(jsonPath("page.totalPages").value(3))
+                .andDo(print());
+        Account kiseok = accountRepository.findByUsername("kiseok");
+        List<Plan> plans = planRepository.findByPlanManagerAndPublished(kiseok, false);
+        assertThat(plans.size()).isEqualTo(11);
+    }
+
+    @Test
+    @DisplayName("내 공개 여행 계획 조회")
+    void getMyPublishedPlans()throws Exception {
+        String token = setting(true);
+
+        mockMvc.perform(get("/plans/mine/published")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON)
+                .header(HttpHeaders.AUTHORIZATION, token))
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0].accountResponseDto.username").value("kiseok"))
+                .andExpect(jsonPath("_embedded.planResponseDtoList[4].accountResponseDto.username").value("kiseok"))
+                .andExpect(jsonPath("_embedded.planResponseDtoList[4]").exists()) // 페이지당 5개
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0].published").value(true))
+                .andExpect(jsonPath("_embedded.planResponseDtoList[4].published").value(true))
+                .andExpect(jsonPath("_links").exists())
+                .andExpect(jsonPath("page.size").value(5))
+                .andExpect(jsonPath("page.totalElements").value(11))
+                .andExpect(jsonPath("page.totalPages").value(3))
+                .andDo(print());
+        Account kiseok = accountRepository.findByUsername("kiseok");
+        List<Plan> plans = planRepository.findByPlanManagerAndPublished(kiseok, true);
+        assertThat(plans.size()).isEqualTo(11);
+    }
+
+    private String setting(boolean published) throws Exception {
+        String token = getAccessToken();
+        //login하면서 security context holder에 사용자 인증정보 추가했고
+        if (published == true) {
+            for (int i = 0; i < 11; i++) {
+                mockMvc.perform(post("/plans")
+                        .header(HttpHeaders.AUTHORIZATION, token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaTypes.HAL_JSON)
+                        .content(objectMapper.writeValueAsString(createPlanDtoWithPublished())));
+            }
+        } else {
+            for (int i = 0; i < 11; i++) {
+                mockMvc.perform(post("/plans")
+                        .header(HttpHeaders.AUTHORIZATION, token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaTypes.HAL_JSON)
+                        .content(objectMapper.writeValueAsString(createPlanDto())));
+            }
+        }
+        return token;
+    }
+    public PlanDto createPlanDtoWithPublished() {
+        Random rand = new Random();
         PlanDto planDto = new PlanDto();
-        planDto.setPlanTitle("test");
+        planDto.setPlanTitle(rand.nextInt(100)+"test");
+        planDto.setPublished(true);
+        planDto.setStartDate(LocalDate.now());
+        planDto.setEndDate(LocalDate.now().plusDays(1));
+        planDto.setPlanTag("spring,java");
+        planDto.setPostDtos(createPostDtos());
+        return planDto;
+    }
+    public PlanDto createPlanDto() {
+        Random rand = new Random();
+        PlanDto planDto = new PlanDto();
+        planDto.setPlanTitle(rand.nextInt(100)+"test");
         planDto.setPublished(false);
         planDto.setStartDate(LocalDate.now());
         planDto.setEndDate(LocalDate.now().plusDays(1));
@@ -163,6 +253,7 @@ class PlanControllerTest {
         planDto.setPostDtos(createPostDtos());
         return planDto;
     }
+
     public PlanDto createWrongPlanDto() {
         PlanDto planDto = new PlanDto();
         planDto.setPlanTitle("test");
@@ -173,7 +264,6 @@ class PlanControllerTest {
         planDto.setPostDtos(createPostDtos());
         return planDto;
     }
-
     private PostDto[][] createPostDtos() {
         PostDto[][] postDtos = new PostDto[2][2];
         for (int i = 0; i < 2; i++) {
@@ -205,4 +295,5 @@ class PlanControllerTest {
         String token = perform.andReturn().getResponse().getHeader("Authorization");
         return token;
     }
+
 }
