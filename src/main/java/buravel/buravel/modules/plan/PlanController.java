@@ -20,9 +20,6 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
@@ -70,6 +67,14 @@ public class PlanController {
         return ResponseEntity.ok(entityModels);
     }
 
+    @GetMapping("/mine/published")
+    public ResponseEntity getMypublishedPlans(@CurrentUser Account account, @PageableDefault(size = 5, sort = "lastModified",
+            direction = Sort.Direction.DESC) Pageable pageable, PagedResourcesAssembler<Plan> assembler) {
+        Page<Plan> plans =  planService.getMyPublishedPlans(account, pageable);
+        PagedModel<EntityModel<PlanResponseDto>> entityModels =
+                assembler.toModel(plans, p -> PlanResource.modelOf(planService.createPlanResponse(p.getPlanManager(), p)));
+        return ResponseEntity.ok(entityModels);
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity getPlan(@PathVariable Long id) throws NotFoundException {
