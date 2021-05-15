@@ -533,7 +533,13 @@ public class PlanService {
 
     public Page<Plan> getMyClosedPlans(Account account, Pageable pageable) {
         Account user = accountRepository.findByUsername(account.getUsername());
-        Page<Plan> plans = planRepository.findByPlanManagerAndPublished(user, false,pageable);
+        Page<Plan> plans = planRepository.findByPlanManagerAndPublished(user, false, pageable);
+        return plans;
+    }
+
+    public Page<Plan> getMyPublishedPlans(Account account, Pageable pageable) {
+        Account user = accountRepository.findByUsername(account.getUsername());
+        Page<Plan> plans = planRepository.findByPlanManagerAndPublished(user, true, pageable);
         return plans;
     }
 }
