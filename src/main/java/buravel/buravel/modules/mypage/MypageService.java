@@ -51,4 +51,12 @@ public class MypageService {
 
         return user;
     }
+
+    public void deleteAccount(Account account){
+        // 유저의 모든 기록을 다 지우는건 데이터 측면에서 별로일 것 같음.
+        // 그래서 차라리 account 내용 다 지우고 id랑 verified만 남기는 방향으로.
+        // 대신 유저 탈퇴 시, 게시글은 계속 남는다 라는 경고창을 띄우는 쪽으로.
+        // 문제는 그럼, 비공개한 게시글과 북마크도 남겨야 하는가? -> 이걸 지우기 위해선 양방향 필요할 듯..
+        Account user = accountRepository.findById(account.getId()).get();
+    }
 }
