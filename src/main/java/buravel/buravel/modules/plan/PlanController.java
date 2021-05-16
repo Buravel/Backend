@@ -68,7 +68,7 @@ public class PlanController {
     }
 
     @GetMapping("/mine/published")
-    public ResponseEntity getMypublishedPlans(@CurrentUser Account account, @PageableDefault(size = 5, sort = "lastModified",
+    public ResponseEntity getMyPublishedPlans(@CurrentUser Account account, @PageableDefault(size = 5, sort = "lastModified",
             direction = Sort.Direction.DESC) Pageable pageable, PagedResourcesAssembler<Plan> assembler) {
         Page<Plan> plans =  planService.getMyPublishedPlans(account, pageable);
         PagedModel<EntityModel<PlanResponseDto>> entityModels =

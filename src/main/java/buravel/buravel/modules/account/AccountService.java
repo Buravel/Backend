@@ -3,6 +3,7 @@ package buravel.buravel.modules.account;
 import buravel.buravel.infra.AppProperties;
 import buravel.buravel.infra.mail.EmailMessage;
 import buravel.buravel.infra.mail.EmailService;
+import buravel.buravel.modules.account.event.SignUpConfirmEvent;
 import buravel.buravel.modules.account.event.TempPasswordEvent;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -45,20 +46,8 @@ public class AccountService implements UserDetailsService {
         return new UserAccount(account);
     }
 
-    public void sendTempPassword(Account account) {
-        if (!account.isEmailVerified()) {
-            throw new AccessDeniedException("이메일 인증된 회원만 가능합니다.");
-        }
-        // temp pass create
-        String uuid = UUID.randomUUID().toString().replaceAll("-", "");
-        uuid = uuid.substring(0, 10);
-        // set temp pass
-        account.setPassword(passwordEncoder.encode(uuid));
-        publisher.publishEvent(new TempPasswordEvent(account,uuid));
-
-    }
-
     // signUp
+
     public Account processNewAccount(AccountDto accountDto) {
         Account account = saveNewAccount(accountDto);
         sendSignUpConfirmEmail(account);
@@ -72,26 +61,21 @@ public class AccountService implements UserDetailsService {
         Account saved = accountRepository.save(map);
         return saved;
     }
-    // verify email
-    private void sendSignUpConfirmEmail(Account account) {
-        Context context = new Context(); // model에 내용담아주듯이
-        context.setVariable("token",account.getEmailCheckToken());
-        context.setVariable("username", account.getUsername());
-        context.setVariable("message","Buravel 서비스 사용을 위해 코드를 복사하여 붙여넣어주세요.");
+    public void sendTempPassword(Account account) {
+        if (!account.isEmailVerified()) {
+            throw new AccessDeniedException("이메일 인증된 회원만 가능합니다.");
+        }
+        // temp pass create
+        String uuid = UUID.randomUUID().toString().replaceAll("-", "");
+        uuid = uuid.substring(0, 10);
+        // set temp pass
+        account.setPassword(passwordEncoder.encode(uuid));
+        publisher.publishEvent(new TempPasswordEvent(account,uuid));
 
-        String message = templateEngine.process("mail/simple-link", context);
-
-        EmailMessage build = EmailMessage.builder()
-                .to(account.getEmail())
-                .subject("Buravel 회원 가입 인증")
-                .message(message)
-                .build();
-
-        emailService.sendEmail(build);
     }
-
-    public void completeSignUp(Account find) {
-        find.completeSignUp();
+    // resend emailCheckToken
+    private void sendSignUpConfirmEmail(Account account) {
+        publisher.publishEvent(new SignUpConfirmEvent(account));
     }
 
     public void reSendEmailCheckToken(Account account) {
@@ -99,6 +83,10 @@ public class AccountService implements UserDetailsService {
         ac.generateEmailCheckToken();
         Account saved = accountRepository.save(ac);
         sendSignUpConfirmEmail(saved);
+    }
+
+    public void completeSignUp(Account find) {
+        find.completeSignUp();
     }
 
     public Account findById(Long id) {
