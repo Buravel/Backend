@@ -24,7 +24,7 @@ public class UpdateUserNicknameValidator implements Validator {
         Account current = accountRepository.findById(account.getId()).get();
         Account updateUser = accountRepository.findByNickname(form.getNickname());
 
-        if (current.equals(updateUser)) {
+        if (updateUser != null && current.getNickname().equals(updateUser.getNickname())) {
             errors.rejectValue("nickname","same nickname","현재 닉네임과 동일합니다.");
         } else if (updateUser != null) {
             errors.rejectValue("nickname","invalid nickname",new Object[]{form.getNickname()},"이미 사용중인 닉네임입니다.");
