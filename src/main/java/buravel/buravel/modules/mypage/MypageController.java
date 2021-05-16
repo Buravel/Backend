@@ -2,6 +2,7 @@ package buravel.buravel.modules.mypage;
 
 import buravel.buravel.modules.account.Account;
 import buravel.buravel.modules.account.CurrentUser;
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,9 @@ public class MypageController {
     }
 
     @DeleteMapping("/account")
-    public ResponseEntity deleteAccount(@CurrentUser Account account){
+    public ResponseEntity deleteAccount(@CurrentUser Account account) throws NotFoundException {
+        mypageService.deleteAccount(account);
+
         return ResponseEntity.ok().build();
     }
 }
