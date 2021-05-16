@@ -8,17 +8,16 @@ import buravel.buravel.modules.bookmark.BookmarkService;
 import buravel.buravel.modules.plan.Plan;
 import buravel.buravel.modules.plan.PlanRepository;
 import buravel.buravel.modules.plan.PlanService;
-import buravel.buravel.modules.post.PostRepository;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -31,6 +30,7 @@ public class MypageService {
     private final PlanService planService;
     private final BookmarkService bookmarkService;
     private final ModelMapper modelMapper;
+    private final PasswordEncoder passwordEncoder;
 
     public UserInfoResponseDto updateUserPicture(PictureRequestDto pictureRequestDto, Account account){
         String image = pictureRequestDto.getProfileImage();
@@ -82,5 +82,24 @@ public class MypageService {
         } // 만든 모든 bookmark 삭제.
 
         accountRepository.deleteById(user.getId()); // 유저 정보 삭제
+    }
+
+    public UserInfoResponseDto getUserInfo(Account account) {
+        Account user = accountRepository.findById(account.getId()).get();
+        return generateUserInfoResponseDto(user);
+    }
+
+    public UserInfoResponseDto updateUserNickname(Account account, UserNicknameRequestDto userNicknameRequestDto) {
+        Account user = accountRepository.findById(account.getId()).get();
+        user.setNickname(userNicknameRequestDto.getNickname());
+
+        return generateUserInfoResponseDto(user);
+    }
+
+    public UserInfoResponseDto updateUserPassword(Account account, UserPasswordRequestDto userPasswordRequestDto) {
+        Account user = accountRepository.findById(account.getId()).get();
+        user.setPassword(passwordEncoder.encode(userPasswordRequestDto.getPassword()));
+
+        return generateUserInfoResponseDto(user);
     }
 }
