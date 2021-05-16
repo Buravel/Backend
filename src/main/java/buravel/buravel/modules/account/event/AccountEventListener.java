@@ -33,6 +33,7 @@ public class AccountEventListener {
 
     @EventListener
     public void handleSignUpConfirmEvent(SignUpConfirmEvent event) {
+        //throw new RuntimeException();
         Account account = event.getAccount();
         sendEmailCheckToken(account);
     }
