@@ -13,7 +13,7 @@ public interface PlanRepository extends JpaRepository<Plan,Long>,PlanRepositoryE
     List<Plan> findAllByPublishedOrderByLastModified(boolean b);
 
     Page<Plan> findByPlanManagerAndPublished(Account user, boolean b, Pageable pageable);
-    
+
     List<Plan> findAllByPlanManager(Account user);
 
     List<Plan> findByPlanManagerAndPublished(Account kiseok, boolean b);
