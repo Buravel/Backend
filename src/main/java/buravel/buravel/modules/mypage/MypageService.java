@@ -71,15 +71,15 @@ public class MypageService {
         // 그래서 우선은 전부 delete로. 이후 수정이 필요하다면 그때 변경
         Account user = accountRepository.findById(account.getId()).get();
 
-        List<Bookmark> bookmarkList = bookmarkRepository.findAllByBookmarkManager(user);
-        for(Bookmark bookmark : bookmarkList){
-            bookmarkService.deleteBookmark(bookmark.getId(), user);
-        } // 만든 모든 bookmark 삭제.
-
         List<Plan> planList = planRepository.findAllByPlanManager(user);
         for(Plan plan : planList){
             planService.deletePlan(plan.getId(), user);
         } // 작성한 모든 plan 삭제. todo: 남긴다면 이 부분이 수정됨.
+
+        List<Bookmark> bookmarkList = bookmarkRepository.findAllByBookmarkManager(user);
+        for(Bookmark bookmark : bookmarkList){
+            bookmarkService.deleteBookmark(bookmark.getId(), user);
+        } // 만든 모든 bookmark 삭제.
 
         accountRepository.deleteById(user.getId()); // 유저 정보 삭제
     }

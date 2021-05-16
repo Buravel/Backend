@@ -19,4 +19,5 @@ public interface BookmarkPostRepository extends JpaRepository<BookmarkPost,Long>
     boolean existsByPlanOfAndPostAndChecked(Plan plan, Post post, boolean checked);
 
     Optional<BookmarkPost> findByPost(Post beforePost);
+    List<BookmarkPost> findAllByPost(Post beforePost);
 }

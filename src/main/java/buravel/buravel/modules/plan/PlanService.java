@@ -3,8 +3,10 @@ package buravel.buravel.modules.plan;
 import buravel.buravel.modules.account.Account;
 import buravel.buravel.modules.account.AccountRepository;
 import buravel.buravel.modules.account.AccountResponseDto;
+import buravel.buravel.modules.bookmark.BookmarkService;
 import buravel.buravel.modules.bookmarkPost.BookmarkPost;
 import buravel.buravel.modules.bookmarkPost.BookmarkPostRepository;
+import buravel.buravel.modules.bookmarkPost.BookmarkPostService;
 import buravel.buravel.modules.planTag.PlanTag;
 import buravel.buravel.modules.planTag.PlanTagRepository;
 import buravel.buravel.modules.planTag.PlanTagResponseDto;
@@ -45,6 +47,7 @@ public class PlanService {
     private final PlanTagRepository planTagRepository;
     private final PostTagRepository postTagRepository;
     private final BookmarkPostRepository bookmarkPostRepository;
+    private final BookmarkPostService bookmarkPostService;
     private final ModelMapper modelMapper;
 
 
@@ -436,11 +439,13 @@ public class PlanService {
             }
             beforePost.setPostTagList(null);
 
-            Optional<BookmarkPost> bookmarkPost = bookmarkPostRepository.findByPost(beforePost);
-            if (!bookmarkPost.isEmpty()) {
-                BookmarkPost find = bookmarkPost.get();
-                beforePost.getBookmarkPosts().remove(find);
-                find.setPost(null);
+            // 한 post에 여러 북마크가 매핑될 수 있으므로 list로 처리
+            //Optional<BookmarkPost> bookmarkPost = bookmarkPostRepository.findByPost(beforePost);
+            List<BookmarkPost> bookmarkPostList = bookmarkPostRepository.findAllByPost(beforePost);
+            for(BookmarkPost find : bookmarkPostList){
+                //find.setPost(null); post 삭제 시 bookmarkpost도 삭제되므로 
+                // bookmarkpost 삭제. but, transaction등 문제 생기면 따로 분리할 것
+                bookmarkPostService.deleteBookmarkPost(find);
             }
             postTagRepository.deleteAllByPost(beforePost);
         }
