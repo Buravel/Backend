@@ -8,6 +8,9 @@ import lombok.*;
 
 import javax.persistence.*;
 
+@NamedEntityGraph(name = "PlanTag.withTag",attributeNodes = {
+        @NamedAttributeNode("tag")
+})
 @Entity
 @Getter
 @Setter
