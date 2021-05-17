@@ -1,5 +1,6 @@
 package buravel.buravel.modules.plan;
 
+import buravel.buravel.modules.IndexController;
 import buravel.buravel.modules.account.Account;
 import buravel.buravel.modules.account.AccountRepository;
 import buravel.buravel.modules.account.AccountResponseDto;
@@ -25,6 +26,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +37,9 @@ import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Service
 @Transactional
@@ -546,6 +551,59 @@ public class PlanService {
         Account user = accountRepository.findByUsername(account.getUsername());
         Page<Plan> plans = planRepository.findByPlanManagerAndPublished(user, true, pageable);
         return plans;
+    }
+
+    public EntityModel<PlanResponseDto> addLinksWithCreate(EntityModel<PlanResponseDto> resultResource) throws NotFoundException {
+        resultResource.add(linkTo(PlanController.class).slash(resultResource.getContent().getId()).withSelfRel());
+        resultResource.add(linkTo(PlanController.class).withRel("updatePlan"));
+        resultResource.add(linkTo(PlanController.class).slash(resultResource.getContent().getId()).withRel("deletePlan"));
+        resultResource.add(linkTo(PlanController.class).slash("mine").slash("closed").withRel("getMyClosedPlans"));
+        resultResource.add(linkTo(PlanController.class).slash("mine").slash("published").withRel("getMyPublishedPlans"));
+        return resultResource;
+    }
+
+    public PagedModel<EntityModel<PlanResponseDto>> addLinksWithClosedPlans(PagedModel<EntityModel<PlanResponseDto>> entityModels) {
+        Collection<EntityModel<PlanResponseDto>> content = entityModels.getContent();
+        for (EntityModel<PlanResponseDto> planResponseDtoEntityModel : content) {
+            planResponseDtoEntityModel.add(linkTo(PlanController.class).slash(planResponseDtoEntityModel.getContent().getId()).withSelfRel());
+            planResponseDtoEntityModel.add(linkTo(PlanController.class).slash(planResponseDtoEntityModel.getContent().getId()).withRel("deletePlan"));
+            planResponseDtoEntityModel.add(linkTo(PlanController.class).withRel("updatePlan"));
+        }
+        entityModels.add(linkTo(PlanController.class).slash("mine").slash("published").withRel("getMyPublishedPlans"));
+        entityModels.add(linkTo(PlanController.class).withRel("createPlan"));
+        return entityModels;
+    }
+
+    public PagedModel<EntityModel<PlanResponseDto>> addLinksWithPublishedPlans(PagedModel<EntityModel<PlanResponseDto>> entityModels) {
+        Collection<EntityModel<PlanResponseDto>> content = entityModels.getContent();
+        for (EntityModel<PlanResponseDto> planResponseDtoEntityModel : content) {
+            planResponseDtoEntityModel.add(linkTo(PlanController.class).slash(planResponseDtoEntityModel.getContent().getId()).withSelfRel());
+            planResponseDtoEntityModel.add(linkTo(PlanController.class).slash(planResponseDtoEntityModel.getContent().getId()).withRel("deletePlan"));
+            planResponseDtoEntityModel.add(linkTo(PlanController.class).withRel("updatePlan"));
+        }
+        entityModels.add(linkTo(PlanController.class).slash("mine").slash("closed").withRel("getMyClosedPlans"));
+        entityModels.add(linkTo(PlanController.class).withRel("createPlan"));
+        return entityModels;
+    }
+
+    public EntityModel<PlanWithPostResponseDto> addLinksWithGetPlan(EntityModel<PlanWithPostResponseDto> model) {
+        model.add(linkTo(PlanController.class).withRel("createPlan"));
+        model.add(linkTo(PlanController.class).slash(model.getContent().getId()).withRel("deletePlan"));
+        model.add(linkTo(PlanController.class).slash("mine").slash("closed").withRel("getMyClosedPlans"));
+        model.add(linkTo(PlanController.class).slash("mine").slash("published").withRel("getMyPublishedPlans"));
+        model.add(linkTo(PlanController.class).withRel("updatePlan"));
+        return model;
+    }
+
+    public PagedModel<EntityModel<PlanResponseDto>> addLinksWithSearch(PagedModel<EntityModel<PlanResponseDto>> model) {
+        Collection<EntityModel<PlanResponseDto>> content = model.getContent();
+        for (EntityModel<PlanResponseDto> planResponseDtoEntityModel : content) {
+            planResponseDtoEntityModel.add(linkTo(PlanController.class).slash(planResponseDtoEntityModel.getContent().getId()).withSelfRel());
+            planResponseDtoEntityModel.add(linkTo(PlanController.class).slash(planResponseDtoEntityModel.getContent().getId()).withRel("deletePlan"));
+            planResponseDtoEntityModel.add(linkTo(PlanController.class).withRel("updatePlan"));
+        }
+        model.add(linkTo(PlanController.class).withRel("createPlan"));
+        return model;
     }
 }
   

@@ -14,12 +14,14 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
+@RequestMapping("/index")
 @RequiredArgsConstructor
 public class IndexController {
 
@@ -39,8 +41,9 @@ public class IndexController {
         //굳이 에러처리 필요 x
         //sort는 직접 넣어보기 sort=~ & dir=desc
         Page<Plan> plan = planService.search(keyword, min, max, pageable);
-        PagedModel<EntityModel<PlanResponseDto>> result =
+        PagedModel<EntityModel<PlanResponseDto>> model =
                 assembler.toModel(plan, p -> PlanResource.modelOf(planService.createPlanResponse(p.getPlanManager(), p)));
+        PagedModel<EntityModel<PlanResponseDto>> result = planService.addLinksWithSearch(model);
         return ResponseEntity.ok(result);
     }
 }

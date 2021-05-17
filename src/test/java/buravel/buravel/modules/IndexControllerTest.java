@@ -89,7 +89,7 @@ class IndexControllerTest {
     @DisplayName("검색 - 금액 조건 x")
     void searchWithoutPrice() throws Exception{
         setting();
-        mockMvc.perform(get("/search")
+        mockMvc.perform(get("/index/search")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON)
                 //공개된!!! 애들 plan->published true
@@ -103,6 +103,11 @@ class IndexControllerTest {
                 .andExpect(jsonPath("_embedded.planResponseDtoList[0].accountResponseDto").exists())
                 .andExpect(jsonPath("_embedded.planResponseDtoList[0].planTagResponseDtos").exists())
                 .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links.search").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links.profile").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links.self").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links.deletePlan").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links.updatePlan").exists())
                 .andExpect(jsonPath("_links").exists())
                 .andExpect(jsonPath("_links.first").exists())
                 .andExpect(jsonPath("_links.last").exists())
@@ -124,7 +129,7 @@ class IndexControllerTest {
         Plan plan = planRepository.findAll().get(0);
         plan.setTotalPrice(100l);
 
-        mockMvc.perform(get("/search")
+        mockMvc.perform(get("/index/search")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON)
                 //공개된!!! 애들 plan->published true
@@ -139,7 +144,11 @@ class IndexControllerTest {
                 .andExpect(jsonPath("_embedded.planResponseDtoList[0].accountResponseDto").exists())
                 .andExpect(jsonPath("_embedded.planResponseDtoList[0].planTagResponseDtos").exists())
                 .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links").exists())
-
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links.search").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links.profile").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links.self").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links.deletePlan").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links.updatePlan").exists())
                 // 해당 가격 범위에 해당하는 plan은 단 1개
                 .andExpect(jsonPath("_embedded.planResponseDtoList[1].id").doesNotExist())
                 .andExpect(jsonPath("_links").exists())
@@ -152,7 +161,7 @@ class IndexControllerTest {
     @DisplayName("검색 - 조건 없는 검색은 plan 전체 조회를 대체할 수 있다.")
     void searchWithoutCond() throws Exception{
         setting();
-        mockMvc.perform(get("/search")
+        mockMvc.perform(get("/index/search")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON)
                 //공개된!!! 애들 plan->published true
@@ -166,6 +175,11 @@ class IndexControllerTest {
                 .andExpect(jsonPath("_embedded.planResponseDtoList[0].accountResponseDto").exists())
                 .andExpect(jsonPath("_embedded.planResponseDtoList[0].planTagResponseDtos").exists())
                 .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links.search").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links.profile").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links.self").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links.deletePlan").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links.updatePlan").exists())
                 .andExpect(jsonPath("_links").exists())
                 .andExpect(jsonPath("_links.first").exists())
                 .andExpect(jsonPath("_links.last").exists())
