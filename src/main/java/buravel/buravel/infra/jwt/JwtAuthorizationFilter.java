@@ -6,6 +6,7 @@ import buravel.buravel.modules.account.UserAccount;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -17,6 +18,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -42,7 +45,12 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         }
         //그게아니면
         String token = request.getHeader(JwtProperties.HEADER_STRING).replace(JwtProperties.TOKEN_PREFIX, "");
-
+        //만약 토큰이 만료되었으면 401 UNAUTHORIZED
+        DecodedJWT decode = JWT.decode(token);
+        if (decode.getExpiresAt().before(new Date(System.currentTimeMillis()))) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
         JWTVerifier build = JWT.require(Algorithm.HMAC256(JwtProperties.SECRET)).build();
 
         String username = build.verify(token).getClaim("username").asString();
