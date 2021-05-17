@@ -211,4 +211,46 @@ class AccountControllerTest {
         String token = perform.andReturn().getResponse().getHeader("Authorization");
         return token;
     }
+
+    @Test
+    @DisplayName("아이디 찾기 메일 발송")
+    void getUsername_ok() throws Exception {
+        AccountDto accountDto = new AccountDto();
+        accountDto.setUsername("kiseok");
+        accountDto.setEmail("may05200@naver.com");
+        accountDto.setPassword("123456789");
+        accountDto.setNickname("hello");
+        Account account = accountService.processNewAccount(accountDto);
+        account.setEmailVerified(true);
+
+
+        mockMvc.perform(get("/findUsername")
+                .param("email", "may05200@naver.com"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("아이디 찾기 에러 - 해당 유저 없음")
+    void getUsername_wrong_noUser() throws Exception {
+        mockMvc.perform(get("/findUsername")
+                .param("email", "may05200@naver.com"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("아이디 찾기 에러 - 이메일 인증된 사용자가 아님")
+    void getUsername_wrong_notEmailVerified() throws Exception {
+        AccountDto accountDto = new AccountDto();
+        accountDto.setUsername("kiseok");
+        accountDto.setEmail("may05200@naver.com");
+        accountDto.setPassword("123456789");
+        accountDto.setNickname("hello");
+        Account account = accountService.processNewAccount(accountDto);
+        account.setEmailVerified(false);
+
+
+        mockMvc.perform(get("/findUsername")
+                .param("email", "may05200@naver.com"))
+                .andExpect(status().isBadRequest());
+    }
 }
