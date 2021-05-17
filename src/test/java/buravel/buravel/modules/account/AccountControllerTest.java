@@ -67,7 +67,13 @@ class AccountControllerTest {
                 .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsString(accountDto)))
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("_links").exists())
+                .andExpect(jsonPath("_links.search").exists())
+                .andExpect(jsonPath("_links.create-plan").exists())
+                .andExpect(jsonPath("_links.myPage").exists())
+                .andExpect(jsonPath("_links.my-closed-plans").exists())
+                .andExpect(jsonPath("_links.my-published-plans").exists());
     }
     @Test
     @DisplayName("회원가입 에러")

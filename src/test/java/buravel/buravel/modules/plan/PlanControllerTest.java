@@ -102,7 +102,16 @@ class PlanControllerTest {
                 .andExpect(jsonPath("id").exists())
                 .andExpect(jsonPath("accountResponseDto").exists())
                 .andExpect(jsonPath("planTagResponseDtos").exists())
+                .andExpect(jsonPath("_links").exists())
+                .andExpect(jsonPath("_links.profile").exists())
+                .andExpect(jsonPath("_links.search").exists())
+                .andExpect(jsonPath("_links.self").exists())
+                .andExpect(jsonPath("_links.updatePlan").exists())
+                .andExpect(jsonPath("_links.deletePlan").exists())
+                .andExpect(jsonPath("_links.getMyClosedPlans").exists())
+                .andExpect(jsonPath("_links.getMyPublishedPlans").exists())
                 .andDo(print());
+
     }
 
     @Test
@@ -138,7 +147,17 @@ class PlanControllerTest {
                 .andExpect(jsonPath("id").exists())
                 .andExpect(jsonPath("accountResponseDto").exists())
                 .andExpect(jsonPath("planTagResponseDtos").exists())
-                .andExpect(jsonPath("postForPlanResponseDtos").exists());
+                .andExpect(jsonPath("postForPlanResponseDtos").exists())
+                .andExpect(jsonPath("_links").exists())
+                .andExpect(jsonPath("_links.search").exists())
+                .andExpect(jsonPath("_links.profile").exists())
+                .andExpect(jsonPath("_links.updatePlan").exists())
+                .andExpect(jsonPath("_links.deletePlan").exists())
+                .andExpect(jsonPath("_links.createPlan").exists())
+                .andExpect(jsonPath("_links.getMyClosedPlans").exists())
+                .andExpect(jsonPath("_links.getMyPublishedPlans").exists())
+        ;
+
         Plan plan = planRepository.findById(id).get();
         //post 4개 만들었다
         assertThat(postRepository.countByPlanOf(plan)).isEqualTo(4);
@@ -175,7 +194,22 @@ class PlanControllerTest {
                 .andExpect(jsonPath("_embedded.planResponseDtoList[4]").exists()) // 페이지당 5개
                 .andExpect(jsonPath("_embedded.planResponseDtoList[0].published").value(false))
                 .andExpect(jsonPath("_embedded.planResponseDtoList[4].published").value(false))
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links.search").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links.profile").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links.self").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links.deletePlan").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links.updatePlan").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[4]._links").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[4]._links.search").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[4]._links.profile").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[4]._links.self").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[4]._links.deletePlan").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[4]._links.updatePlan").exists())
                 .andExpect(jsonPath("_links").exists())
+                .andExpect(jsonPath("_links.self").exists())
+                .andExpect(jsonPath("_links.getMyPublishedPlans").exists())
+                .andExpect(jsonPath("_links.createPlan").exists())
                 .andExpect(jsonPath("page.size").value(5))
                 .andExpect(jsonPath("page.totalElements").value(11))
                 .andExpect(jsonPath("page.totalPages").value(3))
@@ -199,7 +233,22 @@ class PlanControllerTest {
                 .andExpect(jsonPath("_embedded.planResponseDtoList[4]").exists()) // 페이지당 5개
                 .andExpect(jsonPath("_embedded.planResponseDtoList[0].published").value(true))
                 .andExpect(jsonPath("_embedded.planResponseDtoList[4].published").value(true))
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links.search").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links.profile").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links.self").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links.deletePlan").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[0]._links.updatePlan").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[4]._links").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[4]._links.search").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[4]._links.profile").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[4]._links.self").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[4]._links.deletePlan").exists())
+                .andExpect(jsonPath("_embedded.planResponseDtoList[4]._links.updatePlan").exists())
                 .andExpect(jsonPath("_links").exists())
+                .andExpect(jsonPath("_links.self").exists())
+                .andExpect(jsonPath("_links.getMyClosedPlans").exists())
+                .andExpect(jsonPath("_links.createPlan").exists())
                 .andExpect(jsonPath("page.size").value(5))
                 .andExpect(jsonPath("page.totalElements").value(11))
                 .andExpect(jsonPath("page.totalPages").value(3))

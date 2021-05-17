@@ -34,7 +34,7 @@ public class PlanController {
     private final PlanRepository planRepository;
 
     @PostMapping
-    public ResponseEntity createPlan(@RequestBody @Valid PlanDto planDto, @CurrentUser Account account, Errors errors) {
+    public ResponseEntity createPlan(@RequestBody @Valid PlanDto planDto, @CurrentUser Account account, Errors errors) throws NotFoundException {
         if (errors.hasErrors()) {
             EntityModel<Errors> jsr303 = ErrorResource.of(errors);
             return ResponseEntity.badRequest().body(jsr303);
@@ -47,7 +47,8 @@ public class PlanController {
         Plan plan = planService.createPlan(planDto, account);
         PlanResponseDto planResponseDto = planService.createPlanResponse(account, plan);
         EntityModel<PlanResponseDto> resultResource = PlanResource.modelOf(planResponseDto);
-        return ResponseEntity.ok().body(resultResource);
+        EntityModel<PlanResponseDto> result = planService.addLinksWithCreate(resultResource);
+        return ResponseEntity.ok().body(result);
 
     }
 
@@ -64,7 +65,8 @@ public class PlanController {
         Page<Plan> plans =  planService.getMyClosedPlans(account, pageable);
         PagedModel<EntityModel<PlanResponseDto>> entityModels =
                 assembler.toModel(plans, p -> PlanResource.modelOf(planService.createPlanResponse(p.getPlanManager(), p)));
-        return ResponseEntity.ok(entityModels);
+        PagedModel<EntityModel<PlanResponseDto>> result = planService.addLinksWithClosedPlans(entityModels);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/mine/published")
@@ -73,6 +75,7 @@ public class PlanController {
         Page<Plan> plans =  planService.getMyPublishedPlans(account, pageable);
         PagedModel<EntityModel<PlanResponseDto>> entityModels =
                 assembler.toModel(plans, p -> PlanResource.modelOf(planService.createPlanResponse(p.getPlanManager(), p)));
+        PagedModel<EntityModel<PlanResponseDto>> result = planService.addLinksWithPublishedPlans(entityModels);
         return ResponseEntity.ok(entityModels);
     }
 
@@ -81,7 +84,8 @@ public class PlanController {
         if (!planRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
-        EntityModel<PlanWithPostResponseDto> result = planService.getPlanWithPlanId(id);
+        EntityModel<PlanWithPostResponseDto> model = planService.getPlanWithPlanId(id);
+        EntityModel<PlanWithPostResponseDto> result = planService.addLinksWithGetPlan(model);
         return ResponseEntity.ok(result);
     }
 
