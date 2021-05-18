@@ -21,7 +21,6 @@ public class BookmarkPostController {
 
     private final BookmarkPostService bookmarkPostService;
 
-    // 북마크 페이지에서 한번에 다보는건 무리. 필요 시 무한 스크롤 구현 필요할 듯
     @GetMapping("/bookmark/{bookmarkId}")
     public ResponseEntity getBookmarkPosts(@PathVariable(value = "bookmarkId") Long bookmarkId,
                                            @CurrentUser Account account) throws NotFoundException {
@@ -46,7 +45,7 @@ public class BookmarkPostController {
 
         if(bookmarkPostResponseDto == null){
             return ResponseEntity.badRequest().build();
-        }
+        } // 중복 포스트 존재
 
         EntityModel<BookmarkPostResponseDto> bookmarkResource = BookmarkPostResource.modelOf(bookmarkPostResponseDto);
         return ResponseEntity.ok(bookmarkResource);

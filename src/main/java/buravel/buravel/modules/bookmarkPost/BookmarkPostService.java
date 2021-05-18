@@ -127,10 +127,6 @@ public class BookmarkPostService {
     }
 
     public boolean deleteBookmarkPost(BookmarkPost bookmarkPost){
-        if(bookmarkPost.isChecked()){
-            return false;
-        } // there is a plan that uses this bookmark post.
-
         Optional<Bookmark> bookmarkEntity = bookmarkRepository.findById(bookmarkPost.getBookmark().getId());
         if(!bookmarkEntity.isEmpty()){
             bookmarkEntity.get().getBookmarkPosts().remove(bookmarkPost);
