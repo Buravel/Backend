@@ -1,17 +1,31 @@
 package buravel.buravel.modules.bookmarkpost;
 
+import buravel.buravel.modules.account.AccountDto;
+import buravel.buravel.modules.account.AccountService;
 import buravel.buravel.modules.bookmark.BookmarkRepository;
 import buravel.buravel.modules.bookmarkPost.BookmarkPostRepository;
+import buravel.buravel.modules.plan.PlanDto;
 import buravel.buravel.modules.plan.PlanRepository;
+import buravel.buravel.modules.post.PostDto;
 import buravel.buravel.modules.post.PostRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.hateoas.MediaTypes;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.Random;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @Transactional
 @SpringBootTest
@@ -27,6 +41,10 @@ public class BookmarkPostControllerTest {
     PostRepository postRepository;
     @Autowired
     PlanRepository planRepository;
+    @Autowired
+    ObjectMapper objectMapper;
+    @Autowired
+    AccountService accountService;
 
     @BeforeEach
     public void setUp(){
@@ -107,4 +125,83 @@ public class BookmarkPostControllerTest {
     void getCehckBookmarkPost_wrong_noPlan() throws Exception {
 
     }
+
+    private String setting(boolean published) throws Exception {
+        String token = getAccessToken();
+        //login하면서 security context holder에 사용자 인증정보 추가했고
+        if (published == true) {
+            for (int i = 0; i < 11; i++) {
+                mockMvc.perform(post("/plans")
+                        .header(HttpHeaders.AUTHORIZATION, token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaTypes.HAL_JSON)
+                        .content(objectMapper.writeValueAsString(createPlanDtoWithPublished())));
+            }
+        } else {
+            for (int i = 0; i < 11; i++) {
+                mockMvc.perform(post("/plans")
+                        .header(HttpHeaders.AUTHORIZATION, token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaTypes.HAL_JSON)
+                        .content(objectMapper.writeValueAsString(createPlanDto())));
+            }
+        }
+        return token;
+    }
+
+    public PlanDto createPlanDtoWithPublished() {
+        Random rand = new Random();
+        PlanDto planDto = new PlanDto();
+        planDto.setPlanTitle(rand.nextInt(100)+"test");
+        planDto.setPublished(true);
+        planDto.setStartDate(LocalDate.now());
+        planDto.setEndDate(LocalDate.now().plusDays(1));
+        planDto.setPlanTag("spring,java");
+        planDto.setPostDtos(createPostDtos());
+        return planDto;
+    }
+    public PlanDto createPlanDto() {
+        Random rand = new Random();
+        PlanDto planDto = new PlanDto();
+        planDto.setPlanTitle(rand.nextInt(100)+"test");
+        planDto.setPublished(false);
+        planDto.setStartDate(LocalDate.now());
+        planDto.setEndDate(LocalDate.now().plusDays(1));
+        planDto.setPlanTag("spring,java");
+        planDto.setPostDtos(createPostDtos());
+        return planDto;
+    }
+
+    private PostDto[][] createPostDtos() {
+        PostDto[][] postDtos = new PostDto[2][2];
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 2; j++) {
+                PostDto postDto = new PostDto();
+                postDto.setPostTitle("posts");
+                postDto.setPrice(i+10000l);
+                postDto.setCategory("ETC");
+                postDto.setRating(4.0f);
+                postDto.setLog(12.345);
+                postDto.setLat(54.321);
+                postDto.setTags("posts,tag");
+                postDtos[i][j] = postDto;
+            }
+        }
+        return postDtos;
+    }
+
+    private String getAccessToken() throws Exception {
+        AccountDto accountDto = new AccountDto();
+        accountDto.setUsername("kiseok");
+        accountDto.setEmail("kisa0828@naver.com");
+        accountDto.setPassword("123456789");
+        accountDto.setNickname("hello");
+        accountService.processNewAccount(accountDto);
+
+        ResultActions perform = mockMvc.perform(post("/login")
+                .content(objectMapper.writeValueAsString(accountDto)));
+        String token = perform.andReturn().getResponse().getHeader("Authorization");
+        return token;
+    }
+
 }

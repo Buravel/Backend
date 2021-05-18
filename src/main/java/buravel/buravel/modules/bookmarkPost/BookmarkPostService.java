@@ -156,7 +156,9 @@ public class BookmarkPostService {
             Optional<BookmarkPost> bookmarkPostEntity = bookmarkPostRepository.findById(bookmarkPostId);
             if(bookmarkPostEntity.isEmpty()) continue;
 
-            bookmarkPostList.add(bookmarkPostEntity.get());
+            BookmarkPost bp = bookmarkPostEntity.get();
+            if(bp.getPost().isClosed()) continue; // 비공개인건 저장 x
+            bookmarkPostList.add(bp);
         } // bookmarkpost로 변환. 없는거면 굳이 에러반환 안해도 그냥 없애면 됨
 
         bookmarkPostRepository.deleteAllByPlanOf(plan); // 기존 매핑 삭제
