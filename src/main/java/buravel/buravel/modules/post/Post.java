@@ -12,6 +12,13 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@NamedEntityGraph(name = "Post.withManagerAndPlanAndPostTags",attributeNodes = {
+        @NamedAttributeNode("postManager"),
+        @NamedAttributeNode("planOf"),
+        @NamedAttributeNode(value = "postTagList",subgraph = "tags")
+},
+        subgraphs =@NamedSubgraph(name = "tags",attributeNodes = @NamedAttributeNode("tag"))
+)
 @Entity
 @Getter
 @Setter

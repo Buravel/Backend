@@ -17,6 +17,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -43,9 +44,12 @@ public class AccountController {
     }
 
     @PostMapping("/emailVerification")
-    public ResponseEntity emailVerification(@CurrentUser Account account,@RequestParam String token) throws NotFoundException {
-        Account found = accountRepository.findById(account.getId())
-                .orElseThrow(() -> new NotFoundException(account.getUsername()));
+    public ResponseEntity emailVerification(@CurrentUser Account account, @RequestParam String token){
+        Optional<Account> byId = accountRepository.findById(account.getId());
+        if (byId.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        Account found = byId.get();
         if (!account.isValidToken(token)) {
             return ResponseEntity.badRequest().build();
         }
@@ -62,7 +66,11 @@ public class AccountController {
 
     @PostMapping("/tempPassword")
     public ResponseEntity sendTempPassword(@RequestParam String email) {
-        accountService.sendTempPassword(email);
+        Account byEmail = accountRepository.findByEmail(email);
+        if (byEmail == null) {
+            return ResponseEntity.notFound().build();
+        }
+        accountService.sendTempPassword(byEmail);
         return ResponseEntity.ok().build();
     }
 

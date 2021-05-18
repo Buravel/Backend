@@ -31,6 +31,30 @@ public class AccountEventListener {
         sendTempPassword(account,event.getTempPassword());
     }
 
+    @EventListener
+    public void handleSignUpConfirmEvent(SignUpConfirmEvent event) {
+        //throw new RuntimeException();
+        Account account = event.getAccount();
+        sendEmailCheckToken(account);
+    }
+
+    private void sendEmailCheckToken(Account account) {
+        Context context = new Context(); // model에 내용담아주듯이
+        context.setVariable("token",account.getEmailCheckToken());
+        context.setVariable("username", account.getUsername());
+        context.setVariable("message","Buravel 서비스 사용을 위해 코드를 복사하여 붙여넣어주세요.");
+
+        String message = templateEngine.process("mail/simple-link", context);
+
+        EmailMessage build = EmailMessage.builder()
+                .to(account.getEmail())
+                .subject("Buravel 회원 가입 인증")
+                .message(message)
+                .build();
+
+        emailService.sendEmail(build);
+    }
+
     private void sendTempPassword(Account account, String tempPassword) {
         Context context = new Context();
         context.setVariable("username", account.getUsername());

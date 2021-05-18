@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.access.AccessDeniedHandler;
 
 @Configuration
 @EnableWebSecurity
@@ -33,15 +34,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .formLogin().disable()
                 .httpBasic().disable();
         http
-                .addFilter(new JwtAuthenticationFilter(authenticationManager(), accountRepository))
+                .addFilter(new JwtAuthenticationFilter(authenticationManager()))
                 .addFilter(new JwtAuthorizationFilter(authenticationManager(), accountRepository))
-                .authorizeRequests()
 
-                .mvcMatchers("/signUp", "/login", "/", "/tempPassword", "/findUsername","/search").permitAll()
+                .authorizeRequests()
+                .mvcMatchers("/signUp", "/login", "/", "/tempPassword", "/findUsername","/index/search").permitAll()
                 .mvcMatchers(HttpMethod.GET, "/plans","/plans/{id}").permitAll()
 
                 .anyRequest().authenticated();
-
     }
 
     @Override

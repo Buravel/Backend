@@ -2,9 +2,6 @@ package buravel.buravel.modules.plan;
 
 import buravel.buravel.modules.account.Account;
 import buravel.buravel.modules.planTag.PlanTag;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -15,6 +12,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+@NamedEntityGraph(
+        name = "Plan.withAll",
+        attributeNodes ={
+            @NamedAttributeNode("planManager"),
+            @NamedAttributeNode(value = "planTagList",subgraph = "tags")
+        },
+        subgraphs =@NamedSubgraph(name = "tags",attributeNodes =@NamedAttributeNode("tag") )
+)
 @Entity
 @Getter
 @Setter
