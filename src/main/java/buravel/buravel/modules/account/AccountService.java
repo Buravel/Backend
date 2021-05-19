@@ -49,15 +49,19 @@ public class AccountService implements UserDetailsService {
     // signUp
 
     public Account processNewAccount(AccountDto accountDto) {
+        if(!accountDto.isEmailVerified()){
+            return null;
+        }
+
         Account account = saveNewAccount(accountDto);
-        sendSignUpConfirmEmail(account);
+        //sendSignUpConfirmEmail(account);
         return account;
     }
     // save account
     public Account saveNewAccount(AccountDto accountDto) {
         Account map = modelMapper.map(accountDto, Account.class);
         map.setPassword(passwordEncoder.encode(map.getPassword()));
-        map.generateEmailCheckToken();
+        //map.generateEmailCheckToken();
         Account saved = accountRepository.save(map);
         return saved;
     }
@@ -74,15 +78,26 @@ public class AccountService implements UserDetailsService {
 
     }
     // resend emailCheckToken
-    private void sendSignUpConfirmEmail(Account account) {
-        publisher.publishEvent(new SignUpConfirmEvent(account));
+    private void sendSignUpConfirmEmail(String email, String token) {
+        publisher.publishEvent(new SignUpConfirmEvent(email, token));
     }
 
-    public void reSendEmailCheckToken(Account account) {
-        Account ac = accountRepository.findById(account.getId()).get();
-        ac.generateEmailCheckToken();
-        Account saved = accountRepository.save(ac);
-        sendSignUpConfirmEmail(saved);
+    public EmailSendResponseDto reSendEmailCheckToken(String email) {
+        String token = generateEmailCheckToken();
+        sendSignUpConfirmEmail(email, token);
+
+        EmailSendResponseDto dto = new EmailSendResponseDto();
+        dto.setToken(token);
+
+        return dto;
+    }
+
+    public String generateEmailCheckToken() {
+        String uuid = UUID.randomUUID().toString().replaceAll("-", "");
+        uuid = uuid.substring(0, 10);
+        //this.emailCheckTokenGeneratedAt = LocalDateTime.now();
+
+        return uuid;
     }
 
     public void completeSignUp(Account find) {

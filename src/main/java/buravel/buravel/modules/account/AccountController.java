@@ -38,12 +38,18 @@ public class AccountController {
             EntityModel<Errors> customError = ErrorResource.modelOf(errors);
             return ResponseEntity.badRequest().body(customError);
         }
+
         Account account = accountService.processNewAccount(accountDto);
+        if(account == null){
+            return ResponseEntity.badRequest().build();
+        } // not email confirm user
+
         EntityModel<Account> accountResource = AccountResource.modelOf(account);
         return ResponseEntity.ok(accountResource);
     }
 
-    @PostMapping("/emailVerification")
+    // 필요 없을 것 같기도 함.
+    /*@PostMapping("/emailVerification")
     public ResponseEntity emailVerification(@CurrentUser Account account, @RequestParam String token){
         Optional<Account> byId = accountRepository.findById(account.getId());
         if (byId.isEmpty()) {
@@ -55,13 +61,13 @@ public class AccountController {
         }
         accountService.completeSignUp(found);
         return ResponseEntity.ok().build();
-    }
+    }*/
 
     //generate new emailCheckToken & re-send token
-    @PostMapping("/emailCheckToken")
-    public ResponseEntity resendEmailCheckToken(@CurrentUser Account account) {
-        accountService.reSendEmailCheckToken(account);
-        return ResponseEntity.ok().build();
+    @PostMapping("/emailCheckToken") // 일단은 이메일만 받음. 필요시 유저정보 전부 받기로 변경
+    public ResponseEntity resendEmailCheckToken(@RequestParam String email) {
+        EmailSendResponseDto dto = accountService.reSendEmailCheckToken(email);
+        return ResponseEntity.ok(dto);
     }
 
     @PostMapping("/tempPassword")

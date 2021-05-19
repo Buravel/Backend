@@ -28,4 +28,6 @@ public class AccountDto {
     @NotBlank
     @Length(min = 8,max = 40)
     private String password;
+
+    private boolean emailVerified;
 }
