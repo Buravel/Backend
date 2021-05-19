@@ -15,16 +15,17 @@ import javax.validation.Valid;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/mypage")
 public class MypageController {
 
     private final MypageService mypageService;
     private final UpdateUserNicknameValidator validator;
 
-    @PatchMapping("/mypage/picture")
+    @PatchMapping("/picture")
     public ResponseEntity updateUserPicture(@RequestBody PictureRequestDto pictureRequestDto, @CurrentUser Account account){
         UserInfoResponseDto userInfo = mypageService.updateUserPicture(pictureRequestDto, account);
+        EntityModel<UserInfoResponseDto> userInfoResource = mypageService.addLinksChangePicture(userInfo);
 
-        EntityModel<UserInfoResponseDto> userInfoResource = MypageResource.modelOf(userInfo);
         return ResponseEntity.ok(userInfoResource);
     }
 
@@ -35,13 +36,13 @@ public class MypageController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/mypage")
+    @GetMapping("/")
     public ResponseEntity getUserinfo(@CurrentUser Account account) {
         UserInfoResponseDto userInfo = mypageService.getUserInfo(account);
         return ResponseEntity.ok(userInfo);
     }
 
-    @PatchMapping("/mypage/nickname")
+    @PatchMapping("/nickname")
     public ResponseEntity updateUserNickname(@RequestBody @Valid UserNicknameRequestDto userNicknameRequestDto, @CurrentUser Account account, Errors errors) {
         if(errors.hasErrors()){
             EntityModel<Errors> error1 = ErrorResource.modelOf(errors);
@@ -57,7 +58,7 @@ public class MypageController {
         return ResponseEntity.ok(userInfo);
     }
 
-    @PatchMapping("/mypage/password")
+    @PatchMapping("/password")
     public ResponseEntity updateUserPassword(@RequestBody @Valid UserPasswordRequestDto userPasswordRequestDto, @CurrentUser Account account, Errors errors) {
         if(errors.hasErrors()){
             EntityModel<Errors> error1 = ErrorResource.modelOf(errors);

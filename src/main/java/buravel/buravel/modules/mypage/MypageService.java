@@ -11,6 +11,7 @@ import buravel.buravel.modules.plan.PlanService;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @Service
 @Transactional
@@ -101,5 +104,15 @@ public class MypageService {
         user.setPassword(passwordEncoder.encode(userPasswordRequestDto.getPassword()));
 
         return generateUserInfoResponseDto(user);
+    }
+
+    public EntityModel<UserInfoResponseDto> addLinksChangePicture(UserInfoResponseDto userInfo){
+        EntityModel<UserInfoResponseDto> userResource = MypageResource.modelOf(userInfo);
+
+        userResource.add(linkTo(MypageController.class).withRel("myInfo"));
+        userResource.add(linkTo(MypageController.class).slash("nickname").withRel("changeNickname"));
+        userResource.add(linkTo(MypageController.class).slash("password").withRel("changePassword"));
+
+        return userResource;
     }
 }
