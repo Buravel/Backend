@@ -1,6 +1,7 @@
 package buravel.buravel.modules.mypage;
 
 import buravel.buravel.modules.IndexController;
+import buravel.buravel.modules.plan.PlanController;
 import org.springframework.hateoas.EntityModel;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -10,7 +11,11 @@ public class MypageResource extends EntityModel<UserInfoResponseDto> {
 
     public static EntityModel<UserInfoResponseDto> modelOf(UserInfoResponseDto userInfoResponseDto){
         EntityModel<UserInfoResponseDto> userInfoResource = EntityModel.of(userInfoResponseDto);
-        userInfoResource.add(linkTo(methodOn(IndexController.class).index()).withRel("index"));
+
+        userInfoResource.add(linkTo(IndexController.class).slash("search").withRel("search"));
+        userInfoResource.add(linkTo(PlanController.class).slash("mine").slash("closed").withRel("getMyClosedPlans"));
+        userInfoResource.add(linkTo(PlanController.class).slash("mine").slash("published").withRel("getMyPublishedPlans"));
+        userInfoResource.add(linkTo(MypageController.class).slash("account").withRel("deleteAccount"));
 
         return userInfoResource;
     }
