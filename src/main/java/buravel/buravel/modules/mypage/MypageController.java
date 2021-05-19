@@ -25,7 +25,7 @@ public class MypageController {
         UserInfoResponseDto userInfo = mypageService.updateUserPicture(pictureRequestDto, account);
 
         EntityModel<UserInfoResponseDto> userInfoResource = MypageResource.modelOf(userInfo);
-        return ResponseEntity.ok(userInfo);
+        return ResponseEntity.ok(userInfoResource);
     }
 
     @DeleteMapping("/account")

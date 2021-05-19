@@ -10,7 +10,7 @@ public class BookmarkPostResource extends EntityModel<BookmarkPostResponseDto> {
 
     public static EntityModel<BookmarkPostResponseDto> modelOf(BookmarkPostResponseDto bookmarkPostResponseDto){
         EntityModel<BookmarkPostResponseDto> bookmarkPostResource = EntityModel.of(bookmarkPostResponseDto);
-        bookmarkPostResource.add(linkTo(methodOn(IndexController.class).index()).withRel("index"));
+        bookmarkPostResource.add(linkTo(IndexController.class).slash("search").withRel("search"));
 
         return bookmarkPostResource;
     }

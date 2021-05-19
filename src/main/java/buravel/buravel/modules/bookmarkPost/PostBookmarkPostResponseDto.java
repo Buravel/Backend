@@ -26,4 +26,5 @@ public class PostBookmarkPostResponseDto {
     private Double log;
     @Lob
     private String memo;
+    private Long originPlan_id;
 }
