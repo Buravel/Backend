@@ -43,7 +43,7 @@ public class BookmarkPostController {
             return ResponseEntity.badRequest().build();
         } // 중복 포스트 존재
 
-        EntityModel<BookmarkPostResponseDto> bookmarkResource = BookmarkPostResource.modelOf(bookmarkPostResponseDto);
+        EntityModel<BookmarkPostResponseDto> bookmarkResource = bookmarkPostService.addLinksAddBookmarkPost(bookmarkPostResponseDto);
         return ResponseEntity.ok(bookmarkResource);
     }
 

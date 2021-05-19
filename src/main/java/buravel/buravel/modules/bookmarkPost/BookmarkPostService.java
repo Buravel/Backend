@@ -1,5 +1,6 @@
 package buravel.buravel.modules.bookmarkPost;
 
+import buravel.buravel.modules.IndexController;
 import buravel.buravel.modules.bookmark.Bookmark;
 import buravel.buravel.modules.bookmark.BookmarkRepository;
 import buravel.buravel.modules.plan.Plan;
@@ -220,15 +221,16 @@ public class BookmarkPostService {
         CollectionModel<EntityModel<BookmarkPostResponseDto>> collectionModel = CollectionModel
                 .of(bookmarkPostCollect);
 
-        for(EntityModel<BookmarkPostResponseDto> bookmarkPostEntity : collectionModel.getContent()){
-            // 본래 plan 열람할 수 있도록
-            bookmarkPostEntity.add(linkTo(PlanController.class)
-                    .slash(bookmarkPostEntity.getContent().getPostBookmarkPostResponseDto().getOriginPlan_id()).withRel("getOriginPlan"));
-            bookmarkPostEntity.add(linkTo(BookmarkPostController.class).slash("/post")
-                    .slash(bookmarkPostEntity.getContent().getId()).withRel("deleteBookmarkPost"));
-        }
+        collectionModel.add(linkTo(IndexController.class).slash("search").withRel("search"));
 
         return collectionModel;
+    }
+
+    public EntityModel<BookmarkPostResponseDto> addLinksAddBookmarkPost(BookmarkPostResponseDto bookmarkPostResponseDto){
+        EntityModel<BookmarkPostResponseDto> bookmarkResource = BookmarkPostResource.modelOf(bookmarkPostResponseDto);
+        bookmarkResource.add(linkTo(IndexController.class).slash("search").withRel("search"));
+
+        return bookmarkResource;
     }
     
 }
