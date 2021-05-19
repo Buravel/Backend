@@ -24,8 +24,8 @@ public class MypageController {
     @PatchMapping("/picture")
     public ResponseEntity updateUserPicture(@RequestBody PictureRequestDto pictureRequestDto, @CurrentUser Account account){
         UserInfoResponseDto userInfo = mypageService.updateUserPicture(pictureRequestDto, account);
-
         EntityModel<UserInfoResponseDto> userInfoResource = mypageService.addLinksChangePicture(userInfo);
+
         return ResponseEntity.ok(userInfoResource);
     }
 
