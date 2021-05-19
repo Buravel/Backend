@@ -17,26 +17,22 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/bookmark")
 public class BookmarkPostController {
 
     private final BookmarkPostService bookmarkPostService;
 
-    @GetMapping("/bookmark/{bookmarkId}")
+    @GetMapping("/{bookmarkId}")
     public ResponseEntity getBookmarkPosts(@PathVariable(value = "bookmarkId") Long bookmarkId,
                                            @CurrentUser Account account) throws NotFoundException {
         List<BookmarkPostResponseDto> bookmarkPostList = bookmarkPostService.getBookmarkPosts(bookmarkId);
-
-        List<EntityModel<BookmarkPostResponseDto>> bookmarkPostCollect = bookmarkPostList.stream()
-                .map(bookmarkPostResponseDto -> BookmarkPostResource.modelOf(bookmarkPostResponseDto))
-                .collect(Collectors.toList());
-        CollectionModel collectionModel = CollectionModel
-                .of(bookmarkPostCollect, linkTo(BookmarkPostController.class).withSelfRel());
+        CollectionModel collectionModel = bookmarkPostService.addLinksGetBookmarkPost(bookmarkPostList);
 
         return ResponseEntity.ok(collectionModel);
 
     }
 
-    @PostMapping("/bookmark/post/{bookmarkId}/{postId}")
+    @PostMapping("/post/{bookmarkId}/{postId}")
     public ResponseEntity addBookmarkPost(@PathVariable(value = "bookmarkId") Long bookmarkId,
                                           @PathVariable(value = "postId") Long postId,
                                           @CurrentUser Account account) throws NotFoundException {
@@ -47,11 +43,11 @@ public class BookmarkPostController {
             return ResponseEntity.badRequest().build();
         } // 중복 포스트 존재
 
-        EntityModel<BookmarkPostResponseDto> bookmarkResource = BookmarkPostResource.modelOf(bookmarkPostResponseDto);
+        EntityModel<BookmarkPostResponseDto> bookmarkResource = bookmarkPostService.addLinksAddBookmarkPost(bookmarkPostResponseDto);
         return ResponseEntity.ok(bookmarkResource);
     }
 
-    @DeleteMapping("/bookmark/post/{bookmarkPostId}")
+    @DeleteMapping("/post/{bookmarkPostId}")
     public ResponseEntity deleteBookmarkPost(@PathVariable(value = "bookmarkPostId") Long bookmarkPostId,
                                              @CurrentUser Account account) throws NotFoundException {
 
@@ -62,7 +58,7 @@ public class BookmarkPostController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/bookmark/post/checking")
+    @PostMapping("/post/checking")
     public ResponseEntity saveCheckingBookmarkPost(@RequestBody @Valid CheckRequestDto checkRequestDto,
                                                    @CurrentUser Account account) throws NotFoundException {
         CheckResponseDto checkResponseDto = bookmarkPostService.checkBookmarkPosts(checkRequestDto);
@@ -71,7 +67,7 @@ public class BookmarkPostController {
         return ResponseEntity.ok(checkResource);
     }
 
-    @GetMapping("/bookmark/post/{planId}/checking")
+    @GetMapping("/post/{planId}/checking")
     public ResponseEntity getCheckingBookmarkPost(@PathVariable(value = "planId") Long planId,
                                                   @CurrentUser Account account) throws NotFoundException {
         CheckResponseDto checkResponseDto = bookmarkPostService.getCheckedBookmarkPosts(planId);

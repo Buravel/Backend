@@ -1,14 +1,18 @@
 package buravel.buravel.modules.bookmarkPost;
 
+import buravel.buravel.modules.IndexController;
 import buravel.buravel.modules.bookmark.Bookmark;
 import buravel.buravel.modules.bookmark.BookmarkRepository;
 import buravel.buravel.modules.plan.Plan;
+import buravel.buravel.modules.plan.PlanController;
 import buravel.buravel.modules.plan.PlanRepository;
 import buravel.buravel.modules.post.Post;
 import buravel.buravel.modules.post.PostRepository;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
@@ -17,6 +21,9 @@ import java.awt.print.Book;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @Service
 @Transactional
@@ -67,6 +74,7 @@ public class BookmarkPostService {
         PostBookmarkPostResponseDto dto = modelMapper.map(post, PostBookmarkPostResponseDto.class);
 
         dto.setOriginPost_id(post.getId());
+        dto.setOriginPlan_id(post.getPlanOf().getId());
         return dto;
     }
 
@@ -203,6 +211,26 @@ public class BookmarkPostService {
         checkResponseDto.setBookmarkPostResponseDtoList(bookmarkPostResponseDtos);
 
         return checkResponseDto;
+    }
+
+    public CollectionModel<EntityModel<BookmarkPostResponseDto>> addLinksGetBookmarkPost(List<BookmarkPostResponseDto> bookmarkPostList){
+
+        List<EntityModel<BookmarkPostResponseDto>> bookmarkPostCollect = bookmarkPostList.stream()
+                .map(e -> BookmarkPostResource.modelOf(e))
+                .collect(Collectors.toList());
+        CollectionModel<EntityModel<BookmarkPostResponseDto>> collectionModel = CollectionModel
+                .of(bookmarkPostCollect);
+
+        collectionModel.add(linkTo(IndexController.class).slash("search").withRel("search"));
+
+        return collectionModel;
+    }
+
+    public EntityModel<BookmarkPostResponseDto> addLinksAddBookmarkPost(BookmarkPostResponseDto bookmarkPostResponseDto){
+        EntityModel<BookmarkPostResponseDto> bookmarkResource = BookmarkPostResource.modelOf(bookmarkPostResponseDto);
+        bookmarkResource.add(linkTo(IndexController.class).slash("search").withRel("search"));
+
+        return bookmarkResource;
     }
     
 }

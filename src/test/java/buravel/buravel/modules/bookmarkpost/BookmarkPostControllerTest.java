@@ -2,6 +2,7 @@ package buravel.buravel.modules.bookmarkpost;
 
 import buravel.buravel.modules.account.AccountDto;
 import buravel.buravel.modules.account.AccountService;
+import buravel.buravel.modules.bookmark.BookmarkDto;
 import buravel.buravel.modules.bookmark.BookmarkRepository;
 import buravel.buravel.modules.bookmarkPost.BookmarkPostRepository;
 import buravel.buravel.modules.plan.PlanDto;
@@ -126,29 +127,6 @@ public class BookmarkPostControllerTest {
 
     }
 
-    private String setting(boolean published) throws Exception {
-        String token = getAccessToken();
-        //login하면서 security context holder에 사용자 인증정보 추가했고
-        if (published == true) {
-            for (int i = 0; i < 11; i++) {
-                mockMvc.perform(post("/plans")
-                        .header(HttpHeaders.AUTHORIZATION, token)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaTypes.HAL_JSON)
-                        .content(objectMapper.writeValueAsString(createPlanDtoWithPublished())));
-            }
-        } else {
-            for (int i = 0; i < 11; i++) {
-                mockMvc.perform(post("/plans")
-                        .header(HttpHeaders.AUTHORIZATION, token)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaTypes.HAL_JSON)
-                        .content(objectMapper.writeValueAsString(createPlanDto())));
-            }
-        }
-        return token;
-    }
-
     public PlanDto createPlanDtoWithPublished() {
         Random rand = new Random();
         PlanDto planDto = new PlanDto();
@@ -188,6 +166,13 @@ public class BookmarkPostControllerTest {
             }
         }
         return postDtos;
+    }
+
+    public BookmarkDto createBookmark(){
+        BookmarkDto bookmarkDto = new BookmarkDto();
+        bookmarkDto.setBookmarkTitle("bookmark");
+
+        return bookmarkDto;
     }
 
     private String getAccessToken() throws Exception {
