@@ -605,5 +605,14 @@ public class PlanService {
         model.add(linkTo(PlanController.class).withRel("createPlan"));
         return model;
     }
+
+    public EntityModel<PatchPlanResponseDto> addLinksPatchPlan(EntityModel<PatchPlanResponseDto> model) {
+        model.add(linkTo(PlanController.class).slash(model.getContent().getId()).withRel("getPlan"));
+        model.add(linkTo(PlanController.class).withRel("createPlan"));
+        model.add(linkTo(PlanController.class).slash(model.getContent().getId()).withRel("deletePlan"));
+        model.add(linkTo(PlanController.class).slash("mine").slash("closed").withRel("getMyClosedPlans"));
+        model.add(linkTo(PlanController.class).slash("mine").slash("published").withRel("getMyPublishedPlans"));
+        return model;
+    }
 }
   

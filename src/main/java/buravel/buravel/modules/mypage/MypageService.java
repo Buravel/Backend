@@ -115,4 +115,34 @@ public class MypageService {
 
         return userResource;
     }
+
+    public EntityModel<UserInfoResponseDto> addLinksChangeNickname(UserInfoResponseDto userInfo){
+        EntityModel<UserInfoResponseDto> userResource = MypageResource.modelOf(userInfo);
+
+        userResource.add(linkTo(MypageController.class).withRel("myInfo"));
+        userResource.add(linkTo(MypageController.class).slash("picture").withRel("changePicture"));
+        userResource.add(linkTo(MypageController.class).slash("password").withRel("changePassword"));
+
+        return userResource;
+    }
+
+    public EntityModel<UserInfoResponseDto> addLinksChangePassword(UserInfoResponseDto userInfo){
+        EntityModel<UserInfoResponseDto> userResource = MypageResource.modelOf(userInfo);
+
+        userResource.add(linkTo(MypageController.class).withRel("myInfo"));
+        userResource.add(linkTo(MypageController.class).slash("picture").withRel("changePicture"));
+        userResource.add(linkTo(MypageController.class).slash("nickname").withRel("changeNickname"));
+
+        return userResource;
+    }
+
+    public EntityModel<UserInfoResponseDto> addLinksGetUser(UserInfoResponseDto userInfo){
+        EntityModel<UserInfoResponseDto> userResource = MypageResource.modelOf(userInfo);
+
+        userResource.add(linkTo(MypageController.class).slash("picture").withRel("changePicture"));
+        userResource.add(linkTo(MypageController.class).slash("nickname").withRel("changeNickname"));
+        userResource.add(linkTo(MypageController.class).slash("password").withRel("changePassword"));
+
+        return userResource;
+    }
 }

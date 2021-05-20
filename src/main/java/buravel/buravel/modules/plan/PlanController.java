@@ -107,9 +107,9 @@ public class PlanController {
         Plan plan = planService.updatePlan(patchplanRequestDto, account);
 
         PatchPlanResponseDto planResponseDto = planService.updatePlanResponse(plan);
-        EntityModel<PatchPlanResponseDto> resultResource = EntityModel.of(planResponseDto);
-        resultResource.add(linkTo(PlanController.class).withSelfRel());
-        return ResponseEntity.ok().body(resultResource);
+        EntityModel<PatchPlanResponseDto> model = PatchPlanResource.modelOf(planResponseDto);
+        EntityModel<PatchPlanResponseDto> result = planService.addLinksPatchPlan(model);
+        return ResponseEntity.ok().body(result);
     }
 
     @DeleteMapping("/{planId}")

@@ -36,10 +36,11 @@ public class MypageController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/")
+    @GetMapping("")
     public ResponseEntity getUserinfo(@CurrentUser Account account) {
         UserInfoResponseDto userInfo = mypageService.getUserInfo(account);
-        return ResponseEntity.ok(userInfo);
+        EntityModel<UserInfoResponseDto> userInfoResource = mypageService.addLinksGetUser(userInfo);
+        return ResponseEntity.ok(userInfoResource);
     }
 
     @PatchMapping("/nickname")
@@ -55,7 +56,8 @@ public class MypageController {
         }
 
         UserInfoResponseDto userInfo = mypageService.updateUserNickname(account, userNicknameRequestDto);
-        return ResponseEntity.ok(userInfo);
+        EntityModel<UserInfoResponseDto> userInfoResource = mypageService.addLinksChangeNickname(userInfo);
+        return ResponseEntity.ok(userInfoResource);
     }
 
     @PatchMapping("/password")
@@ -65,7 +67,8 @@ public class MypageController {
             return ResponseEntity.badRequest().body(error1);
         }
         UserInfoResponseDto userInfo = mypageService.updateUserPassword(account, userPasswordRequestDto);
-        return ResponseEntity.ok(userInfo);
+        EntityModel<UserInfoResponseDto> userInfoResource = mypageService.addLinksChangePassword(userInfo);
+        return ResponseEntity.ok(userInfoResource);
     }
 
 }
