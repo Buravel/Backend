@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -85,8 +86,23 @@ public class AccountService implements UserDetailsService {
         sendSignUpConfirmEmail(saved);
     }
 
+    public AccountResponseDto emailVerification(Account account, String token){
+        if (!account.isValidToken(token)) {
+            return null;
+        }
+
+        completeSignUp(account);
+        return createAccountResponseDto(account);
+    }
+
     public void completeSignUp(Account find) {
         find.completeSignUp();
+    }
+
+    public AccountResponseDto createAccountResponseDto(Account account){
+        AccountResponseDto dto = modelMapper.map(account, AccountResponseDto.class);
+
+        return dto;
     }
 
     public Account findById(Long id) {

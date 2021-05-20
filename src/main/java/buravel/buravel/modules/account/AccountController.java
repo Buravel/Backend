@@ -49,12 +49,13 @@ public class AccountController {
         if (byId.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        Account found = byId.get();
-        if (!account.isValidToken(token)) {
+
+        AccountResponseDto dto = accountService.emailVerification(byId.get(), token);
+        if(dto == null){
             return ResponseEntity.badRequest().build();
-        }
-        accountService.completeSignUp(found);
-        return ResponseEntity.ok().build();
+        } // 인증번호 맞지 않음
+
+        return ResponseEntity.ok(dto);
     }
 
     //generate new emailCheckToken & re-send token

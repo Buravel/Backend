@@ -190,6 +190,8 @@ class AccountControllerTest {
                 .header(HttpHeaders.AUTHORIZATION, token)
                 .param("token", emailCheckToken))
                 .andExpect(status().isOk());
+
+        assertThat(accountRepository.findByUsername("kiseok").isEmailVerified()).isTrue();
     }
     @Test
     @DisplayName("이메일 인증 실패")
