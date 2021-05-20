@@ -9,7 +9,9 @@ import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 @NamedEntityGraph(
@@ -65,8 +67,11 @@ public class Plan {
     private Long trafficTotalPrice= 0L;
     private Long etcTotalPrice= 0L;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    private List<String> top3List = new ArrayList<>();
+    @ElementCollection(fetch = FetchType.LAZY)
+    private Set<String> top3List = new HashSet<>();
+    //spring data jpa 사용 시 set처럼 순서가 없고 list처럼 중복을 허용하는 경우 MultipleBagFetchException발생
+    // 하이버네이트는 list를 bag으로 사용 -> 우리의 서비스에서 top3list는 말 그대로 상위 3개를 표현하기 위한 것
+    // 상위 3개의 순서는 중요하지 않다. set으로 변경하여 해결
     /**
      * 카테고리별 토탈프라이스 hashMap써서 정렬하고
      * flightTotalPrice : 123456
