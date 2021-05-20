@@ -35,6 +35,7 @@ public class PlanRepositoryExtensionImpl extends QuerydslRepositorySupport imple
                 .leftJoin(plan.planManager, account).fetchJoin()
                 .leftJoin(plan.planTagList, planTag).fetchJoin()
                 .leftJoin(planTag.tag, tag).fetchJoin()
+                .innerJoin(plan.top3List).fetchJoin()
                 .distinct();
         JPQLQuery<Plan> planQuery = getQuerydsl().applyPagination(pageable, query);
         QueryResults<Plan> result = planQuery.fetchResults();
@@ -51,6 +52,7 @@ public class PlanRepositoryExtensionImpl extends QuerydslRepositorySupport imple
                 .leftJoin(plan.planManager, account).fetchJoin()
                 .leftJoin(plan.planTagList, planTag).fetchJoin()
                 .leftJoin(planTag.tag, tag).fetchJoin()
+                .innerJoin(plan.top3List).fetchJoin()
                 .distinct();
         JPQLQuery<Plan> planQuery = getQuerydsl().applyPagination(pageable, queryWithPrice);
         QueryResults<Plan> result = planQuery.fetchResults();

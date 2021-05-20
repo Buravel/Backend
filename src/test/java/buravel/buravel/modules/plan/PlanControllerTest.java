@@ -76,7 +76,7 @@ class PlanControllerTest {
 /**
  * 현재 create-drop으로 설정했기 때문에 시작 시 drop을 먼저한다. 그러나 application.properties에서 사용하는 db는
  * 실행시킨적이 없고 테이블이 구성되어있지 않아서 - drop table if exists를 먼저 수행 이 후 create해서 테이블 생성 후 테스트
- * 그래서 application.properties에서 buravel db를 사용하지 않고 dialect설정 추가로 플랫폼 지정
+ * application.properties에서 buravel db를 사용하지 않고 dialect설정 추가로 플랫폼 지정
  * */
     @BeforeEach
     public void setUp() {
