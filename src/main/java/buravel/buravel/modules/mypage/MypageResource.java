@@ -14,6 +14,7 @@ public class MypageResource extends EntityModel<UserInfoResponseDto> {
         EntityModel<UserInfoResponseDto> userInfoResource = EntityModel.of(userInfoResponseDto);
 
         userInfoResource.add(linkTo(IndexController.class).slash("search").withRel("search"));
+        userInfoResource.add(linkTo(PlanController.class).withRel("create-plan"));
         userInfoResource.add(linkTo(PlanController.class).slash("mine").slash("closed").withRel("getMyClosedPlans"));
         userInfoResource.add(linkTo(PlanController.class).slash("mine").slash("published").withRel("getMyPublishedPlans"));
         userInfoResource.add(linkTo(MypageController.class).slash("account").withRel("deleteAccount"));
