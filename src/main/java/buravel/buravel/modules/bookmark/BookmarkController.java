@@ -39,7 +39,8 @@ public class BookmarkController {
     @GetMapping
     public ResponseEntity getBookmarkList(@CurrentUser Account account){
 
-        CollectionModel<EntityModel<BookmarkResponseDto>> response = bookmarkService.findAllBookmark(account);
+        CollectionModel<EntityModel<BookmarkResponseDto>> entityModels = bookmarkService.findAllBookmark(account);
+        CollectionModel<EntityModel<BookmarkResponseDto>> response = bookmarkService.addLinkWithBookmarks(entityModels);
         return ResponseEntity.ok(response);
     }
 
@@ -59,21 +60,24 @@ public class BookmarkController {
 
         BookmarkResponseDto bookmarkResponseDto = bookmarkService.createBookmark(bookmarkDto,account);
         EntityModel<BookmarkResponseDto> responseResource = BookmarkResource.modelOf(bookmarkResponseDto);
+        responseResource.add(linkTo(BookmarkController.class).withRel("getBookmarkList"));
+        responseResource.add(linkTo(BookmarkController.class).slash(bookmarkResponseDto.getId()).withRel("deleteBookmark"));
+        responseResource.add(linkTo(BookmarkController.class).slash(bookmarkResponseDto.getId()).withRel("modifyBookmark"));
+
 
         return ResponseEntity.ok(responseResource);
     }
 
     @DeleteMapping(value = "/{bookmark_id}")
     public ResponseEntity deleteBookmark(@PathVariable Long bookmark_id, @CurrentUser Account account){
-
+        URI location = linkTo(BookmarkController.class).withRel("getBookmarkList").toUri();
         try{
             bookmarkService.deleteBookmark(bookmark_id,account);
-            URI location = linkTo(BookmarkController.class).withRel("get-list").toUri();
             return ResponseEntity.ok(location);
         } catch (NotFoundException e) {
             return ResponseEntity.notFound().build(); //not found bookmark
         } catch (RuntimeException e){
-            return ResponseEntity.badRequest().build(); //invalid user
+            return ResponseEntity.badRequest().body(location); //invalid user
         }
     }
 
@@ -89,15 +93,20 @@ public class BookmarkController {
             EntityModel<Errors> error2 = ErrorResource.modelOf(errors);
             return ResponseEntity.badRequest().body(error2);
         }
+        URI location = linkTo(BookmarkController.class).withRel("getBookmarkList").toUri();
         try{
-            bookmarkService.deleteBookmark(bookmark_id,account);
-            BookmarkResponseDto bookmarkResponseDto = bookmarkService.createBookmark(bookmarkDto,account);
-            URI location = linkTo(BookmarkPostController.class).slash(bookmarkResponseDto.getId()).withSelfRel().toUri();
-            return ResponseEntity.ok(location);
+            BookmarkResponseDto bookmarkResponseDto = bookmarkService.modifyBookmark(bookmark_id,bookmarkDto,account);
+            EntityModel<BookmarkResponseDto> responseResource = BookmarkResource.modelOf(bookmarkResponseDto);
+
+            responseResource.add(linkTo(BookmarkController.class).withRel("getBookmarkList"));
+            responseResource.add(linkTo(BookmarkController.class).slash(bookmarkResponseDto.getId()).withRel("deleteBookmark"));
+            responseResource.add(linkTo(BookmarkController.class).slash(bookmarkResponseDto.getId()).withRel("modifyBookmark"));
+
+            return ResponseEntity.ok(responseResource);
         } catch (NotFoundException e) {
             return ResponseEntity.notFound().build();
         } catch (RuntimeException e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(location);
         }
     }
 }

@@ -16,9 +16,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.ModelMap;
 
+import javax.swing.text.html.Option;
+import java.awt.print.Book;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -32,7 +35,7 @@ public class BookmarkService {
     private final ModelMapper modelMapper;
     private final BookmarkPostService bookmarkPostService;
 
-    //북마크 목록 검
+    //북마크 목록 검색
     public CollectionModel<EntityModel<BookmarkResponseDto>> findAllBookmark(Account account) {
         List<Bookmark> bookmarks = bookmarkRepository.findAllByBookmarkManager(account);
         List<BookmarkResponseDto> bookmarkResponseDtos = new ArrayList<>();
@@ -46,11 +49,11 @@ public class BookmarkService {
 
         List<EntityModel<BookmarkResponseDto>> collect =
                 bookmarkResponseDtos.stream().map(p -> BookmarkResource.modelOf(p)).collect(Collectors.toList());
-        CollectionModel<EntityModel<BookmarkResponseDto>> response = CollectionModel.of(collect,linkTo(BookmarkController.class).withSelfRel());
+        CollectionModel<EntityModel<BookmarkResponseDto>> response = CollectionModel.of(collect,linkTo(BookmarkController.class).withRel("getBookmarkList"));
         return response;
     }
 
-    //북마크 생성하고 bookmark response dto 반
+    //북마크 생성하고 bookmark response dto 반환
     public BookmarkResponseDto createBookmark(BookmarkDto bookmarkDto, Account account) {
         Bookmark bookmark = new Bookmark();
         bookmark.setBookmarkTitle(bookmarkDto.getBookmarkTitle());
@@ -60,22 +63,52 @@ public class BookmarkService {
         return bookmarkResponseDto;
     }
 
-    public void deleteBookmark(Long bookmark_id,Account account) throws NotFoundException,RuntimeException {
-        Bookmark bookmark;
-        if(bookmarkRepository.findById(bookmark_id).isEmpty())
-            throw new NotFoundException("not found");
-        else{
-            bookmark = bookmarkRepository.findById(bookmark_id).get();
-            if(bookmark.getBookmarkManager().getId()!=account.getId())
-                throw new RuntimeException("invalid bookmark_id for this user");
-        }
-
-        //연결된 bookmark post도 삭
+    //북마크를 만들때 북마크 포스트를 포함해야 하는 경우 사용
+    public BookmarkResponseDto createBookmark(BookmarkDto bookmarkDto,Account account,List<BookmarkPost> bookmarkPosts){
+        Bookmark bookmark = new Bookmark();
+        bookmark.setBookmarkTitle(bookmarkDto.getBookmarkTitle());
+        bookmark.setBookmarkManager(account);
         List<BookmarkPost> bookmarkPostList = bookmark.getBookmarkPosts();
+        for(BookmarkPost bookmarkPost : bookmarkPosts){
+            bookmarkPostList.add(bookmarkPost);
+        }
+        bookmark.setBookmarkPosts(bookmarkPosts);
+        bookmark = bookmarkRepository.save(bookmark);
+        BookmarkResponseDto bookmarkResponseDto = createBookmarkResponseDto(bookmark);
+        return bookmarkResponseDto;
+    }
+
+    public void deleteBookmark(Long bookmark_id,Account account) throws NotFoundException,RuntimeException {
+        Bookmark bookmark = getBookmarkById(bookmark_id);
+        if(bookmark.getBookmarkManager().getId()!=account.getId())
+            throw new RuntimeException("invalid bookmark_id for this user");
+
+        //연결된 bookmark post도 삭제
+        List<BookmarkPost> bookmarkPostList = bookmark.getBookmarkPosts();
+        List<Long> bookmarkPostIds = new ArrayList<>();
         for(BookmarkPost bookmarkPost : bookmarkPostList){
-            bookmarkPostService.processDeleteBookmarkPost(bookmarkPost.getId());
+            bookmarkPostIds.add(bookmarkPost.getId());
+        }
+        for(Long id : bookmarkPostIds){
+            bookmarkPostService.processDeleteBookmarkPost(id);
         }
         bookmarkRepository.deleteById(bookmark_id);
+    }
+
+    public BookmarkResponseDto modifyBookmark (Long bookmark_id,BookmarkDto bookmarkDto, Account account) throws NotFoundException,RuntimeException {
+        Bookmark bookmark = getBookmarkById(bookmark_id);
+        if(bookmark.getBookmarkManager().getId()!=account.getId())
+            throw new RuntimeException("invalid bookmark_id for this user");
+        bookmark.setBookmarkTitle(bookmarkDto.getBookmarkTitle());
+        BookmarkResponseDto bookmarkResponseDto = createBookmarkImageDto(bookmark);
+        return bookmarkResponseDto;
+    }
+
+    public Bookmark getBookmarkById (Long bookmark_id) throws NotFoundException {
+        Optional<Bookmark> bookmark = bookmarkRepository.findById(bookmark_id);
+        if(bookmark.isEmpty())
+            throw new NotFoundException("not found");
+        return bookmark.get();
     }
 
     //reponse dto 에 Image 포함시키기를 고려하지 전에 생성한 메소드 사용부분
@@ -89,12 +122,12 @@ public class BookmarkService {
         return bookmarkResponseDto;
     }
 
-    //계정 응답 디티오 생
+    //계정 응답 디티오 생성
     private AccountResponseDto createAccountResponseDto(Account account) {
         return modelMapper.map(account,AccountResponseDto.class);
     }
 
-    //이미지 response dto 에 넣어서 반
+    //이미지 response dto 에 넣어서 반환
     private BookmarkResponseDto createBookmarkImageDto(Bookmark bookmark){
         BookmarkResponseDto bookmarkResponseDto = modelMapper.map(bookmark,BookmarkResponseDto.class);
         List<BookmarkPost> bookmarkPosts = bookmark.getBookmarkPosts();
@@ -107,5 +140,14 @@ public class BookmarkService {
         }
         bookmarkResponseDto.setBookmarkImages(images);
         return bookmarkResponseDto;
+    }
+
+    public CollectionModel<EntityModel<BookmarkResponseDto>> addLinkWithBookmarks(CollectionModel<EntityModel<BookmarkResponseDto>> entityModels) {
+        for(EntityModel<BookmarkResponseDto> entityModel : entityModels){
+            entityModel.add(linkTo(BookmarkController.class).slash(entityModel.getContent().getId()).withRel("deleteBookmark"));
+            entityModel.add(linkTo(BookmarkController.class).slash(entityModel.getContent().getId()).withRel("modifyBookmark"));
+            entityModel.add(linkTo(BookmarkController.class).withRel("getBookmarkList"));
+        }
+        return entityModels;
     }
 }
