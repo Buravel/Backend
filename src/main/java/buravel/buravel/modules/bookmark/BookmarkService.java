@@ -35,12 +35,12 @@ public class BookmarkService {
     private final ModelMapper modelMapper;
     private final BookmarkPostService bookmarkPostService;
 
-    //북마크 목록 검
+    //북마크 목록 검사
     public CollectionModel<EntityModel<BookmarkResponseDto>> findAllBookmark(Account account) {
         List<Bookmark> bookmarks = bookmarkRepository.findAllByBookmarkManager(account);
         List<BookmarkResponseDto> bookmarkResponseDtos = new ArrayList<>();
 
-        //북마크를 이미지가 포함된 bookmark response Dto 로 변환해서 어레이에 담
+        //북마크를 이미지가 포함된 bookmark response Dto 로 변환해서 어레이에 담기
         for (Bookmark bookmark : bookmarks) {
             BookmarkResponseDto bookmarkResponseDto = createBookmarkImageDto(bookmark);
             bookmarkResponseDto.setAccountResponseDto(createAccountResponseDto(account));
@@ -53,7 +53,7 @@ public class BookmarkService {
         return response;
     }
 
-    //북마크 생성하고 bookmark response dto 반
+    //북마크 생성하고 bookmark response dto 반환
     public BookmarkResponseDto createBookmark(BookmarkDto bookmarkDto, Account account) {
         Bookmark bookmark = new Bookmark();
         bookmark.setBookmarkTitle(bookmarkDto.getBookmarkTitle());
@@ -79,15 +79,9 @@ public class BookmarkService {
     }
 
     public void deleteBookmark(Long bookmark_id,Account account) throws NotFoundException,RuntimeException {
-        Optional<Bookmark> bookmarkEntity = bookmarkRepository.findById(bookmark_id);
-        Bookmark bookmark;
-        if(bookmarkEntity.isEmpty())
-            throw new NotFoundException("not found");
-        else{
-            bookmark = bookmarkEntity.get();
-            if(bookmark.getBookmarkManager().getId()!=account.getId())
-                throw new RuntimeException("invalid bookmark_id for this user");
-        }
+        Bookmark bookmark = getBookmarkById(bookmark_id);
+        if(bookmark.getBookmarkManager().getId()!=account.getId())
+            throw new RuntimeException("invalid boomark_id for this user");
 
         //연결된 bookmark post도 삭제
         List<BookmarkPost> bookmarkPostList = bookmark.getBookmarkPosts();
@@ -103,6 +97,8 @@ public class BookmarkService {
 
     public BookmarkResponseDto modifyBookmark (Long bookmark_id,BookmarkDto bookmarkDto, Account account) throws NotFoundException,RuntimeException {
         Bookmark bookmark = getBookmarkById(bookmark_id);
+        if(bookmark.getBookmarkManager().getId()!=account.getId())
+            throw new RuntimeException("invalid boomark_id for this user");
         bookmark.setBookmarkTitle(bookmarkDto.getBookmarkTitle());
         BookmarkResponseDto bookmarkResponseDto = createBookmarkImageDto(bookmark);
         return bookmarkResponseDto;
@@ -126,12 +122,12 @@ public class BookmarkService {
         return bookmarkResponseDto;
     }
 
-    //계정 응답 디티오 생
+    //계정 응답 디티오 생성
     private AccountResponseDto createAccountResponseDto(Account account) {
         return modelMapper.map(account,AccountResponseDto.class);
     }
 
-    //이미지 response dto 에 넣어서 반
+    //이미지 response dto 에 넣어서 반환
     private BookmarkResponseDto createBookmarkImageDto(Bookmark bookmark){
         BookmarkResponseDto bookmarkResponseDto = modelMapper.map(bookmark,BookmarkResponseDto.class);
         List<BookmarkPost> bookmarkPosts = bookmark.getBookmarkPosts();
@@ -144,5 +140,15 @@ public class BookmarkService {
         }
         bookmarkResponseDto.setBookmarkImages(images);
         return bookmarkResponseDto;
+    }
+
+    //북마크들에 링크 달아주기(삭제,수정,북마크리스트)
+    public CollectionModel<EntityModel<BookmarkResponseDto>> addLinkWithBookmarks(CollectionModel<EntityModel<BookmarkResponseDto>> entityModels) {
+        for(EntityModel<BookmarkResponseDto> entityModel : entityModels){
+            entityModel.add(linkTo(BookmarkController.class).slash(entityModel.getContent().getId()).withRel("deleteBookmark"));
+            entityModel.add(linkTo(BookmarkController.class).slash(entityModel.getContent().getId()).withRel("modifyBookmark"));
+            entityModel.add(linkTo(BookmarkController.class).withRel("getBookmarkList"));
+        }
+        return entityModels;
     }
 }

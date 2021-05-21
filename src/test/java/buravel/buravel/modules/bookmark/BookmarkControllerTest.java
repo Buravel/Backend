@@ -12,9 +12,9 @@ import buravel.buravel.modules.post.PostRepository;
 import buravel.buravel.modules.postTag.PostTagRepository;
 import buravel.buravel.modules.tag.TagRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -30,8 +30,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import javax.transaction.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -76,7 +75,7 @@ class BookmarkControllerTest {
         bookmarkRepository.deleteAll();
     }
 
-    @org.junit.Test
+    @Test
     @DisplayName("북마크 생성 성공")
     void createBookmark() throws  Exception{
         String token = getAccessToken();
@@ -91,7 +90,7 @@ class BookmarkControllerTest {
                 .andDo(print());
     }
 
-    @org.junit.Test
+    @Test
     @DisplayName("북마크 생성 실패-이미 존재하는 이름")
     void createBookmark_fail() throws  Exception{
         String token = getAccessToken();
@@ -110,7 +109,7 @@ class BookmarkControllerTest {
                 .andDo(print());
     }
 
-    @org.junit.Test
+    @Test
     @DisplayName("북마크 수정 실패 - 자신의 북마크가 아닐 때")
     void modifyBookmark_invalidUser() throws  Exception{
         String token_other = getAccessToken_other();
@@ -120,9 +119,31 @@ class BookmarkControllerTest {
                 .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsString(createBookmarkDto())));
 
+        Long id = bookmarkRepository.findAll().get(0).getId();
         //다른 계정으로 북마크 수정 접근
         String token = getAccessToken();
-        mockMvc.perform(patch("/bookmark/{bookmark_id}",2)
+        mockMvc.perform(patch("/bookmark/{bookmark_id}",id)
+                .header(HttpHeaders.AUTHORIZATION, token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON)
+                .content(objectMapper.writeValueAsString(createBookmarkDto1())))
+                .andExpect(status().isBadRequest())
+                .andDo(print());
+
+    }
+
+    @Test
+    @DisplayName("북마크 수정 실패 - 이미 존재하는 이름")
+    void modifyBookmark_invalidName() throws  Exception{
+        String token = getAccessToken();
+        mockMvc.perform(post("/bookmark")
+                .header(HttpHeaders.AUTHORIZATION, token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON)
+                .content(objectMapper.writeValueAsString(createBookmarkDto())));
+
+        Long id = bookmarkRepository.findAll().get(0).getId();
+        mockMvc.perform(patch("/bookmark/{bookmark_id}",id)
                 .header(HttpHeaders.AUTHORIZATION, token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON)
@@ -132,16 +153,26 @@ class BookmarkControllerTest {
 
     }
 
-    @org.junit.Test
-    @DisplayName("북마크 수정 실패 - 이미 존재하는 이름")
-    void modifyBookmark_invalidName() throws  Exception{
-
-    }
-
     @Test
     @DisplayName("북마크 삭제 실패 - 자신의 북마크가 아닐 때")
     void deleteBookmark_faild() throws  Exception{
+        String token_other = getAccessToken_other();
+        mockMvc.perform(post("/bookmark")
+                .header(HttpHeaders.AUTHORIZATION, token_other)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON)
+                .content(objectMapper.writeValueAsString(createBookmarkDto())));
 
+        Long id = bookmarkRepository.findAll().get(0).getId();
+        //다른 계정으로 북마크 삭제 접근
+        String token = getAccessToken();
+        mockMvc.perform(delete("/bookmark/{bookmark_id}",id)
+                .header(HttpHeaders.AUTHORIZATION, token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON)
+                .content(objectMapper.writeValueAsString(createBookmarkDto1())))
+                .andExpect(status().isBadRequest())
+                .andDo(print());
     }
 
 
@@ -149,6 +180,12 @@ class BookmarkControllerTest {
         BookmarkDto bookmarkDto = new BookmarkDto();
         bookmarkDto.setBookmarkTitle("test");
         return bookmarkDto;
+    }
+
+    private BookmarkDto createBookmarkDto1() throws Exception{
+        BookmarkDto bookmarkDto1 = new BookmarkDto();
+        bookmarkDto1.setBookmarkTitle("test2");
+        return bookmarkDto1;
     }
 
     private String getAccessToken() throws Exception {
