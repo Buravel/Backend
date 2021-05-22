@@ -1,37 +1,85 @@
 package buravel.buravel.modules.account;
 
+import buravel.buravel.modules.errors.ErrorResource;
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import buravel.buravel.modules.account.validator.SignUpFormValidator;
+import buravel.buravel.modules.errors.ErrorResource;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import java.util.Optional;
 
-/** 테스트용 컨트롤러 */
 @RestController
 @RequiredArgsConstructor
 public class AccountController {
 
     private final AccountRepository accountRepository;
-    private final ModelMapper modelMapper;
-    private final PasswordEncoder passwordEncoder;
+    private final AccountService accountService;
+    private final SignUpFormValidator validator;
 
     @PostMapping("/signUp")
-    public String join(@RequestBody AccountDto accountDto) {
-        Account account = modelMapper.map(accountDto, Account.class);
-        account.setPassword(passwordEncoder.encode(account.getPassword()));
-        Account save = accountRepository.save(account);
-        return save.getUsername() + save.getPassword() + " 회원가입완료";
+    public ResponseEntity signUp(@RequestBody @Valid AccountDto accountDto, Errors errors) {
+        if (errors.hasErrors()) {
+            EntityModel<Errors> jsr303error = ErrorResource.modelOf(errors);
+            return ResponseEntity.badRequest().body(jsr303error);
+        }
+        validator.validate(accountDto, errors);
+        if (errors.hasErrors()) {
+            EntityModel<Errors> customError = ErrorResource.modelOf(errors);
+            return ResponseEntity.badRequest().body(customError);
+        }
+        Account account = accountService.processNewAccount(accountDto);
+        EntityModel<Account> accountResource = AccountResource.modelOf(account);
+        return ResponseEntity.ok(accountResource);
     }
 
-    @GetMapping("/hello")
-    public String hello(@CurrentUser Account account) {
-        if (account == null) {
-            throw new AccessDeniedException("권한없음");
+    @PostMapping("/emailVerification")
+    public ResponseEntity emailVerification(@CurrentUser Account account, @RequestParam String token){
+        Optional<Account> byId = accountRepository.findById(account.getId());
+        if (byId.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
-        return account.getUsername()+"님 안녕하세요~";
+
+        AccountResponseDto dto = accountService.emailVerification(byId.get(), token);
+        if(dto == null){
+            return ResponseEntity.badRequest().build();
+        } // 인증번호 맞지 않음
+
+        return ResponseEntity.ok(dto);
+    }
+
+    //generate new emailCheckToken & re-send token
+    @PostMapping("/emailCheckToken")
+    public ResponseEntity resendEmailCheckToken(@CurrentUser Account account) {
+        accountService.reSendEmailCheckToken(account);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/tempPassword")
+    public ResponseEntity sendTempPassword(@RequestParam String email) {
+        Account byEmail = accountRepository.findByEmail(email);
+        if (byEmail == null) {
+            return ResponseEntity.notFound().build();
+        }
+        accountService.sendTempPassword(byEmail);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/findUsername")
+    public ResponseEntity sendUsername(@RequestParam String email){
+        if(!accountService.sendUsername(email))
+            return ResponseEntity.badRequest().build();
+
+        return ResponseEntity.ok().build();
     }
 }

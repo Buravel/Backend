@@ -1,6 +1,8 @@
 package buravel.buravel.modules.account;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
 
 import javax.persistence.*;
@@ -14,13 +16,15 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(of = "id")
 public class Account {
     @Id
     @GeneratedValue
     @Column(name = "account_id")
     private Long id;
 
-    private String username;
+    private String username; // 유저id
+    private String nickname; //유저닉네임
 
     @JsonIgnore
     @Column(nullable = false)
@@ -36,12 +40,23 @@ public class Account {
 
     private boolean emailVerified;
 
+    @JsonIgnore
     private String emailCheckToken;
 
-    private LocalDateTime emailCheckTokenGeneratedAt;
+    //private LocalDateTime emailCheckTokenGeneratedAt;
 
     public void generateEmailCheckToken() {
-        this.emailCheckToken = UUID.randomUUID().toString();
-        this.emailCheckTokenGeneratedAt = LocalDateTime.now();
+        String uuid = UUID.randomUUID().toString().replaceAll("-", "");
+        uuid = uuid.substring(0, 10);
+        this.emailCheckToken = uuid;
+        //this.emailCheckTokenGeneratedAt = LocalDateTime.now();
+    }
+
+    public boolean isValidToken(String token) {
+        return this.emailCheckToken.equals(token);
+    }
+
+    public void completeSignUp() {
+        this.setEmailVerified(true);
     }
 }

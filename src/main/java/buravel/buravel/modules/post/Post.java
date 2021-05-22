@@ -4,18 +4,28 @@ import buravel.buravel.modules.account.Account;
 import buravel.buravel.modules.bookmarkPost.BookmarkPost;
 import buravel.buravel.modules.plan.Plan;
 import buravel.buravel.modules.postTag.PostTag;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@NamedEntityGraph(name = "Post.withManagerAndPlanAndPostTags",attributeNodes = {
+        @NamedAttributeNode("postManager"),
+        @NamedAttributeNode("planOf"),
+        @NamedAttributeNode(value = "postTagList",subgraph = "tags")
+},
+        subgraphs =@NamedSubgraph(name = "tags",attributeNodes = @NamedAttributeNode("tag"))
+)
 @Entity
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(of = "id")
 public class Post {
     @Id
     @GeneratedValue
@@ -26,7 +36,7 @@ public class Post {
     private String postTitle;
 
     @Column(nullable = false)
-    private Long price;
+    private Long price= 0L;
 
     //보여줄 땐 x.x만원  - 가격입력받을 때  12345원 -> 345버리고 12 string으로 변환 후 중간에 . 추가하는 로직으로 필드값할당
     private String outputPrice;

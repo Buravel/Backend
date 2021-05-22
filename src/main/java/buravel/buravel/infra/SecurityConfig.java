@@ -4,12 +4,16 @@ import buravel.buravel.infra.jwt.JwtAuthenticationFilter;
 import buravel.buravel.infra.jwt.JwtAuthorizationFilter;
 import buravel.buravel.modules.account.AccountRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.access.AccessDeniedHandler;
 
 @Configuration
 @EnableWebSecurity
@@ -17,7 +21,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final AccountRepository accountRepository;
-    private final PasswordEncoder passwordEncoder;
     private final CorsConfig corsConfig;
 
 
@@ -31,11 +34,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .formLogin().disable()
                 .httpBasic().disable();
         http
-                .addFilter(new JwtAuthenticationFilter(authenticationManager(), accountRepository))
+                .addFilter(new JwtAuthenticationFilter(authenticationManager()))
                 .addFilter(new JwtAuthorizationFilter(authenticationManager(), accountRepository))
-                .authorizeRequests()
-                .mvcMatchers("/signUp", "/login","/").permitAll()
-                .anyRequest().authenticated();
 
+                .authorizeRequests()
+                .mvcMatchers("/signUp", "/login", "/", "/tempPassword", "/findUsername","/index/search").permitAll()
+                .mvcMatchers(HttpMethod.GET, "/plans","/plans/{id}").permitAll()
+
+                .anyRequest().authenticated();
+    }
+
+    @Override
+    public void configure(WebSecurity web) throws Exception
+    {
+        web.ignoring()
+                .mvcMatchers("/favicon.ico","/resources/**","/error")
+                .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
 }

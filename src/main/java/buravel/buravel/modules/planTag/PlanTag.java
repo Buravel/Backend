@@ -2,16 +2,22 @@ package buravel.buravel.modules.planTag;
 
 import buravel.buravel.modules.plan.Plan;
 import buravel.buravel.modules.tag.Tag;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
 
 import javax.persistence.*;
 
+@NamedEntityGraph(name = "PlanTag.withTag",attributeNodes = {
+        @NamedAttributeNode("tag")
+})
 @Entity
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(of = "id")
 public class PlanTag {
     @Id
     @GeneratedValue
