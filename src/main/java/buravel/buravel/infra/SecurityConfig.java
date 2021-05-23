@@ -41,8 +41,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .mvcMatchers("/signUp", "/login", "/", "/tempPassword", "/findUsername","/index/search").permitAll()
                 .mvcMatchers(HttpMethod.GET, "/plans","/plans/{id}").permitAll()
 
-//                .anyRequest().authenticated();
-                .anyRequest().permitAll();
+                .anyRequest().authenticated();
+
     }
 
     @Override
