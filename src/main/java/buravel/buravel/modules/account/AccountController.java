@@ -77,9 +77,12 @@ public class AccountController {
 
     @GetMapping("/findUsername")
     public ResponseEntity sendUsername(@RequestParam String email){
-        if(!accountService.sendUsername(email))
-            return ResponseEntity.badRequest().build();
+        Account account = accountRepository.findByEmail(email);
+        if(account == null) {
+            return ResponseEntity.notFound().build();
+        } // no such user
 
+        accountService.sendUsername(account);
         return ResponseEntity.ok().build();
     }
 }
