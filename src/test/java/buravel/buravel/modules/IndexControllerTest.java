@@ -224,8 +224,9 @@ class IndexControllerTest {
                 postDto.setPrice(i+10000l);
                 postDto.setCategory("ETC");
                 postDto.setRating(4.0f);
-                postDto.setLog(12.345);
+                postDto.setLng(12.345);
                 postDto.setLat(54.321);
+                postDto.setLocation("우리집");
                 postDto.setTags("posts,tag");
                 postDtos[i][j] = postDto;
             }

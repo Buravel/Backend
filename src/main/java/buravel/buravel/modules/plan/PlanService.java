@@ -138,7 +138,8 @@ public class PlanService {
                 post.setRating(postDto.getRating());
                 plan.setPlanRating(plan.getPlanRating()+ postDto.getRating());
                 post.setLat(postDto.getLat());
-                post.setLog(postDto.getLog());
+                post.setLng(postDto.getLng());
+                post.setLocation(postDto.getLocation());
                 post.setDay(i);
                 post.setOrdering(j);
                 post.setMemo(postDto.getMemo());

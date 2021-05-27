@@ -24,7 +24,9 @@ public class PostDto {
     @NotBlank
     private Double lat;
     @NotBlank
-    private Double log;
+    private Double lng;
+    @NotBlank
+    private String location;
     @Lob
     private String memo;
 
