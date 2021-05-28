@@ -149,10 +149,10 @@ class AccountControllerTest {
         accountDto.setNickname("hello");
         Account account = accountService.processNewAccount(accountDto);
         account.setEmailVerified(true);
-
-
+        EmailDto emailDto = new EmailDto();
+        emailDto.setEmail("kisa0828@naver.com");
         mockMvc.perform(post("/tempPassword")
-                .param("email", "kisa0828@naver.com"));
+                .content(objectMapper.writeValueAsString(emailDto)));
         Account user = accountRepository.findByEmail("kisa0828@naver.com");
         assertThat(user.getPassword().matches("123456789")).isFalse();
 
@@ -167,16 +167,21 @@ class AccountControllerTest {
         accountDto.setNickname("hello");
         Account account = accountService.processNewAccount(accountDto);
         account.setEmailVerified(false);
-
+        EmailDto emailDto = new EmailDto();
+        emailDto.setEmail("kisa0828@naver.com");
         mockMvc.perform(post("/tempPassword")
-                .param("email", "kisa0828@naver.com"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(emailDto)))
                 .andExpect(status().isForbidden());
     }
     @Test
     @DisplayName("임시 비밀번호 발급 에러 - 회원 가입된 이메일만 사용가능")
     void getTempPassword_wrong_withoutSignUp() throws Exception {
+        EmailDto emailDto = new EmailDto();
+        emailDto.setEmail("hello@naver.com");
         mockMvc.perform(post("/tempPassword")
-                .param("email", "hello@naver.com"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(emailDto)))
                 .andExpect(status().isNotFound());
     }
 
@@ -186,7 +191,7 @@ class AccountControllerTest {
         String token = getAccessToken();
         Account user = accountRepository.findByUsername("kiseok");
         String emailCheckToken = user.getEmailCheckToken();
-        mockMvc.perform(post("/emailVerification")
+        mockMvc.perform(get("/emailVerification")
                 .header(HttpHeaders.AUTHORIZATION, token)
                 .param("token", emailCheckToken))
                 .andExpect(status().isOk());
@@ -199,7 +204,7 @@ class AccountControllerTest {
         String token = getAccessToken();
         Account user = accountRepository.findByUsername("kiseok");
         String emailCheckToken = user.getEmailCheckToken();
-        mockMvc.perform(post("/emailVerification")
+        mockMvc.perform(get("/emailVerification")
                 .header(HttpHeaders.AUTHORIZATION, token)
                 .param("token", emailCheckToken+"error"))
                 .andDo(print())

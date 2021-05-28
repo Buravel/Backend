@@ -43,7 +43,7 @@ public class AccountController {
         return ResponseEntity.ok(accountResource);
     }
 
-    @PostMapping("/emailVerification")
+    @GetMapping("/emailVerification")
     public ResponseEntity emailVerification(@CurrentUser Account account, @RequestParam String token){
         Optional<Account> byId = accountRepository.findById(account.getId());
         if (byId.isEmpty()) {
@@ -66,8 +66,12 @@ public class AccountController {
     }
 
     @PostMapping("/tempPassword")
-    public ResponseEntity sendTempPassword(@RequestParam String email) {
-        Account byEmail = accountRepository.findByEmail(email);
+    public ResponseEntity sendTempPassword(@RequestBody @Valid EmailDto email, Errors errors) {
+        if (errors.hasErrors()) {
+            EntityModel<Errors> jsr303error = ErrorResource.modelOf(errors);
+            return ResponseEntity.badRequest().body(jsr303error);
+        }
+        Account byEmail = accountRepository.findByEmail(email.getEmail());
         if (byEmail == null) {
             return ResponseEntity.notFound().build();
         }
