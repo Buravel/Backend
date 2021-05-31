@@ -100,10 +100,12 @@ public class BookmarkService {
         bookmarkRepository.deleteById(bookmark_id);
     }
 
-    public BookmarkResponseDto modifyBookmark (Long bookmark_id,BookmarkDto bookmarkDto, Account account) throws NotFoundException,RuntimeException {
+    public BookmarkResponseDto modifyBookmark (Long bookmark_id,BookmarkDto bookmarkDto, Account account) throws NotFoundException{
+        Account find = accountRepository.findById(account.getId()).get();
         Bookmark bookmark = getBookmarkById(bookmark_id);
-        if(bookmark.getBookmarkManager().getId()!=account.getId())
-            throw new RuntimeException("invalid bookmark_id for this user");
+        if (!bookmark.getBookmarkManager().equals(find)) {
+            throw new AccessDeniedException("사용 권한이 없습니다.");
+        }
         bookmark.setBookmarkTitle(bookmarkDto.getBookmarkTitle());
         BookmarkResponseDto bookmarkResponseDto = createBookmarkImageDto(bookmark);
         return bookmarkResponseDto;

@@ -130,7 +130,7 @@ class BookmarkControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsString(createBookmarkDto1())))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isForbidden())
                 .andDo(print());
 
     }

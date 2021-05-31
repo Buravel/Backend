@@ -80,7 +80,12 @@ public class BookmarkController {
     }
 
     @PatchMapping(value = "/{bookmark_id}")
-    public ResponseEntity modifyBookmarkTitle(@PathVariable Long bookmark_id,@RequestBody @Valid BookmarkDto bookmarkDto,@CurrentUser Account account,Errors errors){
+    public ResponseEntity modifyBookmarkTitle(@PathVariable Long bookmark_id,@RequestBody @Valid BookmarkDto bookmarkDto,@CurrentUser Account account,Errors errors) throws NotFoundException{
+
+        if (!bookmarkRepository.existsById(bookmark_id)) {
+            return ResponseEntity.notFound().build();
+        }
+
         if(errors.hasErrors()) {
             EntityModel<Errors> error1 = ErrorResource.modelOf(errors);
             return ResponseEntity.badRequest().body(error1);
@@ -91,20 +96,15 @@ public class BookmarkController {
             EntityModel<Errors> error2 = ErrorResource.modelOf(errors);
             return ResponseEntity.badRequest().body(error2);
         }
+
         URI location = linkTo(BookmarkController.class).withRel("getBookmarkList").toUri();
-        try{
-            BookmarkResponseDto bookmarkResponseDto = bookmarkService.modifyBookmark(bookmark_id,bookmarkDto,account);
-            EntityModel<BookmarkResponseDto> responseResource = BookmarkResource.modelOf(bookmarkResponseDto);
+        BookmarkResponseDto bookmarkResponseDto = bookmarkService.modifyBookmark(bookmark_id,bookmarkDto,account);
+        EntityModel<BookmarkResponseDto> responseResource = BookmarkResource.modelOf(bookmarkResponseDto);
 
-            responseResource.add(linkTo(BookmarkController.class).withRel("getBookmarkList"));
-            responseResource.add(linkTo(BookmarkController.class).slash(bookmarkResponseDto.getId()).withRel("deleteBookmark"));
-            responseResource.add(linkTo(BookmarkController.class).slash(bookmarkResponseDto.getId()).withRel("modifyBookmark"));
+        responseResource.add(linkTo(BookmarkController.class).withRel("getBookmarkList"));
+        responseResource.add(linkTo(BookmarkController.class).slash(bookmarkResponseDto.getId()).withRel("deleteBookmark"));
+        responseResource.add(linkTo(BookmarkController.class).slash(bookmarkResponseDto.getId()).withRel("modifyBookmark"));
 
-            return ResponseEntity.ok(responseResource);
-        } catch (NotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (RuntimeException e){
-            return ResponseEntity.badRequest().body(location);
-        }
+        return ResponseEntity.ok(location);
     }
 }
