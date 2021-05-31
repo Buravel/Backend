@@ -1,6 +1,7 @@
 package buravel.buravel.modules.bookmark;
 
 import buravel.buravel.modules.account.Account;
+import buravel.buravel.modules.account.AccountRepository;
 import buravel.buravel.modules.account.AccountResponseDto;
 import buravel.buravel.modules.bookmarkPost.BookmarkPost;
 import buravel.buravel.modules.bookmarkPost.BookmarkPostService;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.ModelMap;
@@ -34,6 +36,7 @@ public class BookmarkService {
     private final BookmarkRepository bookmarkRepository;
     private final ModelMapper modelMapper;
     private final BookmarkPostService bookmarkPostService;
+    private final AccountRepository accountRepository;
 
     //북마크 목록 검색
     public CollectionModel<EntityModel<BookmarkResponseDto>> findAllBookmark(Account account) {
@@ -78,10 +81,12 @@ public class BookmarkService {
         return bookmarkResponseDto;
     }
 
-    public void deleteBookmark(Long bookmark_id,Account account) throws NotFoundException,RuntimeException {
+    public void deleteBookmark(Long bookmark_id,Account account) throws NotFoundException{
+        Account find = accountRepository.findById(account.getId()).get();
         Bookmark bookmark = getBookmarkById(bookmark_id);
-        if(bookmark.getBookmarkManager().getId()!=account.getId())
-            throw new RuntimeException("invalid bookmark_id for this user");
+        if (!bookmark.getBookmarkManager().equals(find)) {
+            throw new AccessDeniedException("사용 권한이 없습니다.");
+        }
 
         //연결된 bookmark post도 삭제
         List<BookmarkPost> bookmarkPostList = bookmark.getBookmarkPosts();

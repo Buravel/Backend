@@ -69,16 +69,14 @@ public class BookmarkController {
     }
 
     @DeleteMapping(value = "/{bookmark_id}")
-    public ResponseEntity deleteBookmark(@PathVariable Long bookmark_id, @CurrentUser Account account){
+    public ResponseEntity deleteBookmark(@PathVariable Long bookmark_id, @CurrentUser Account account) throws NotFoundException {
         URI location = linkTo(BookmarkController.class).withRel("getBookmarkList").toUri();
-        try{
-            bookmarkService.deleteBookmark(bookmark_id,account);
-            return ResponseEntity.ok(location);
-        } catch (NotFoundException e) {
-            return ResponseEntity.notFound().build(); //not found bookmark
-        } catch (RuntimeException e){
-            return ResponseEntity.badRequest().body(location); //invalid user
+        if (!bookmarkRepository.existsById(bookmark_id)) {
+            return ResponseEntity.notFound().build();
         }
+        bookmarkService.deleteBookmark(bookmark_id,account);
+        return ResponseEntity.ok(location);
+
     }
 
     @PatchMapping(value = "/{bookmark_id}")
