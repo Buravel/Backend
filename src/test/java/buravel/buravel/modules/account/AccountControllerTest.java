@@ -211,20 +211,6 @@ class AccountControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    private String getAccessToken() throws Exception {
-        AccountDto accountDto = new AccountDto();
-        accountDto.setUsername("kiseok");
-        accountDto.setEmail("kisa0828@naver.com");
-        accountDto.setPassword("123456789");
-        accountDto.setNickname("hello");
-        accountService.processNewAccount(accountDto);
-
-        ResultActions perform = mockMvc.perform(post("/login")
-                .content(objectMapper.writeValueAsString(accountDto)));
-        String token = perform.andReturn().getResponse().getHeader("Authorization");
-        return token;
-    }
-
     @Test
     @DisplayName("아이디 찾기 메일 발송")
     void getUsername_ok() throws Exception {
@@ -247,7 +233,7 @@ class AccountControllerTest {
     void getUsername_wrong_noUser() throws Exception {
         mockMvc.perform(get("/findUsername")
                 .param("email", "may05200@naver.com"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -264,6 +250,20 @@ class AccountControllerTest {
 
         mockMvc.perform(get("/findUsername")
                 .param("email", "may05200@naver.com"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isForbidden());
+    }
+
+    private String getAccessToken() throws Exception {
+        AccountDto accountDto = new AccountDto();
+        accountDto.setUsername("kiseok");
+        accountDto.setEmail("kisa0828@naver.com");
+        accountDto.setPassword("123456789");
+        accountDto.setNickname("hello");
+        accountService.processNewAccount(accountDto);
+
+        ResultActions perform = mockMvc.perform(post("/login")
+                .content(objectMapper.writeValueAsString(accountDto)));
+        String token = perform.andReturn().getResponse().getHeader("Authorization");
+        return token;
     }
 }

@@ -38,6 +38,12 @@ public class AccountEventListener {
         sendEmailCheckToken(account);
     }
 
+    @EventListener
+    public void handleFindUsernameEvent(FindUsernameEvent event) {
+        Account account = event.getAccount();
+        sendUsername(account);
+    }
+
     private void sendEmailCheckToken(Account account) {
         Context context = new Context(); // model에 내용담아주듯이
         context.setVariable("token",account.getEmailCheckToken());
@@ -68,5 +74,20 @@ public class AccountEventListener {
                 .build();
 
         emailService.sendEmail(emailMessage);
+    }
+
+    private void sendUsername(Account account){
+        Context context = new Context();
+        context.setVariable("username", account.getUsername());
+
+        String message = templateEngine.process("mail/sendUsername", context);
+
+        EmailMessage build = EmailMessage.builder()
+                .to(account.getEmail())
+                .subject("Buravel 아이디 찾기")
+                .message(message)
+                .build();
+
+        emailService.sendEmail(build);
     }
 }
