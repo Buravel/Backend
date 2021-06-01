@@ -3,6 +3,7 @@ package buravel.buravel.modules.account;
 import buravel.buravel.infra.AppProperties;
 import buravel.buravel.infra.mail.EmailMessage;
 import buravel.buravel.infra.mail.EmailService;
+import buravel.buravel.modules.account.event.FindUsernameEvent;
 import buravel.buravel.modules.account.event.SignUpConfirmEvent;
 import buravel.buravel.modules.account.event.TempPasswordEvent;
 import javassist.NotFoundException;
@@ -114,30 +115,11 @@ public class AccountService implements UserDetailsService {
     }
 
 
-    public boolean sendUsername(String email){
-        Account account = accountRepository.findByEmail(email);
-
-        if(account == null){
-            throw new UsernameNotFoundException(email);
-        } // no such email user
-
-        if(!account.isEmailVerified()){
-            return false;
+    public void sendUsername(Account account){
+        if (!account.isEmailVerified()) {
+            throw new AccessDeniedException("이메일 인증된 회원만 가능합니다.");
         } // not verified user
 
-        Context context = new Context();
-        context.setVariable("username", account.getUsername());
-        context.setVariable("host", appProperties.getHost());
-
-        String message = templateEngine.process("mail/sendUsername", context);
-
-        EmailMessage build = EmailMessage.builder()
-                .to(account.getEmail())
-                .subject("Buravel 아이디 찾기")
-                .message(message)
-                .build();
-
-        emailService.sendEmail(build);
-        return true;
+        publisher.publishEvent(new FindUsernameEvent(account));
     }
 }
