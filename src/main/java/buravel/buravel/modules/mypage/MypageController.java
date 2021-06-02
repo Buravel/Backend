@@ -71,4 +71,20 @@ public class MypageController {
         return ResponseEntity.ok(userInfoResource);
     }
 
+    @PostMapping("/passwordChecking")
+    public ResponseEntity checkPassword(@RequestBody @Valid UserPasswordRequestDto userPasswordRequestDto, @CurrentUser Account account, Errors errors){
+        if(errors.hasErrors()){
+            EntityModel<Errors> error1 = ErrorResource.modelOf(errors);
+            return ResponseEntity.badRequest().body(error1);
+        }
+
+        UserInfoResponseDto userInfo = mypageService.checkPassword(account, userPasswordRequestDto);
+        if(userInfo == null){
+            return ResponseEntity.badRequest().build();
+        }
+
+        EntityModel<UserInfoResponseDto> userInfoResource = mypageService.addLinksCheckPassword(userInfo);
+        return ResponseEntity.ok(userInfoResource);
+    }
+
 }
