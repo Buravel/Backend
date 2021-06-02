@@ -83,7 +83,7 @@ public class MypageController {
             return ResponseEntity.badRequest().build();
         }
 
-        EntityModel userInfoResource = mypageService.addLinksCheckPassword(userInfo);
+        EntityModel<UserInfoResponseDto> userInfoResource = mypageService.addLinksCheckPassword(userInfo);
         return ResponseEntity.ok(userInfoResource);
     }
 
