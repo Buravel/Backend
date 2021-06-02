@@ -78,12 +78,13 @@ public class MypageController {
             return ResponseEntity.badRequest().body(error1);
         }
 
-        if(mypageService.checkPassword(account, userPasswordRequestDto)){
-            return ResponseEntity.ok().build();
-        }
-        else{
+        UserInfoResponseDto userInfo = mypageService.checkPassword(account, userPasswordRequestDto);
+        if(userInfo == null){
             return ResponseEntity.badRequest().build();
         }
+
+        EntityModel userInfoResource = mypageService.addLinksCheckPassword(userInfo);
+        return ResponseEntity.ok(userInfoResource);
     }
 
 }

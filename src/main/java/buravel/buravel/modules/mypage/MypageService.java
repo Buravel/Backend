@@ -106,13 +106,13 @@ public class MypageService {
         return generateUserInfoResponseDto(user);
     }
 
-    public boolean checkPassword(Account account, UserPasswordRequestDto userPasswordRequestDto){
+    public UserInfoResponseDto checkPassword(Account account, UserPasswordRequestDto userPasswordRequestDto){
         Account user = accountRepository.findById(account.getId()).get();
 
-        if(passwordEncoder.matches(userPasswordRequestDto.getPassword(), user.getPassword()))
-            return true;
+        if(!passwordEncoder.matches(userPasswordRequestDto.getPassword(), user.getPassword()))
+            return null;
 
-        return false;
+        return generateUserInfoResponseDto(user);
     }
 
     public EntityModel<UserInfoResponseDto> addLinksChangePicture(UserInfoResponseDto userInfo){
@@ -152,6 +152,13 @@ public class MypageService {
         userResource.add(linkTo(MypageController.class).slash("nickname").withRel("changeNickname"));
         userResource.add(linkTo(MypageController.class).slash("password").withRel("changePassword"));
 
+        return userResource;
+    }
+
+    public EntityModel<UserInfoResponseDto> addLinksCheckPassword(UserInfoResponseDto userInfo){
+        EntityModel<UserInfoResponseDto> userResource = EntityModel.of(userInfo);
+
+        userResource.add(linkTo(MypageController.class).withRel("myInfo"));
         return userResource;
     }
 }
