@@ -106,6 +106,15 @@ public class MypageService {
         return generateUserInfoResponseDto(user);
     }
 
+    public boolean checkPassword(Account account, UserPasswordRequestDto userPasswordRequestDto){
+        Account user = accountRepository.findById(account.getId()).get();
+
+        if(passwordEncoder.matches(userPasswordRequestDto.getPassword(), user.getPassword()))
+            return true;
+
+        return false;
+    }
+
     public EntityModel<UserInfoResponseDto> addLinksChangePicture(UserInfoResponseDto userInfo){
         EntityModel<UserInfoResponseDto> userResource = MypageResource.modelOf(userInfo);
 

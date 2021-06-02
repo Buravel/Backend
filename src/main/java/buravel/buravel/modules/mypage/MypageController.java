@@ -71,4 +71,19 @@ public class MypageController {
         return ResponseEntity.ok(userInfoResource);
     }
 
+    @PostMapping("/passwordChecking")
+    public ResponseEntity checkPassword(@RequestBody @Valid UserPasswordRequestDto userPasswordRequestDto, @CurrentUser Account account, Errors errors){
+        if(errors.hasErrors()){
+            EntityModel<Errors> error1 = ErrorResource.modelOf(errors);
+            return ResponseEntity.badRequest().body(error1);
+        }
+
+        if(mypageService.checkPassword(account, userPasswordRequestDto)){
+            return ResponseEntity.ok().build();
+        }
+        else{
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
 }
