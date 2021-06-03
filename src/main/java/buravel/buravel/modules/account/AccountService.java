@@ -130,8 +130,13 @@ public class AccountService implements UserDetailsService {
         AccountWithPlanDto result = new AccountWithPlanDto();
         result.setAccount(account);
         Plan plan  = planRepository.findPlanSoon(account);
-        PlanResponseDto planResponse = planService.createPlanResponse(account, plan);
-        result.setPlanResponseDto(planResponse);
-        return result;
+        if (plan == null) {
+            result.setPlanResponseDto(null);
+            return result;
+        } else {
+            PlanResponseDto planResponse = planService.createPlanResponse(account, plan);
+            result.setPlanResponseDto(planResponse);
+            return result;
+        }
     }
 }
