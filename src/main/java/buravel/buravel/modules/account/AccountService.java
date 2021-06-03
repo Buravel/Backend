@@ -6,6 +6,10 @@ import buravel.buravel.infra.mail.EmailService;
 import buravel.buravel.modules.account.event.FindUsernameEvent;
 import buravel.buravel.modules.account.event.SignUpConfirmEvent;
 import buravel.buravel.modules.account.event.TempPasswordEvent;
+import buravel.buravel.modules.plan.Plan;
+import buravel.buravel.modules.plan.PlanRepository;
+import buravel.buravel.modules.plan.PlanResponseDto;
+import buravel.buravel.modules.plan.PlanService;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -32,12 +36,11 @@ import java.util.UUID;
 public class AccountService implements UserDetailsService {
 
     private final AccountRepository accountRepository;
-    private final AppProperties appProperties;
     private final ApplicationEventPublisher publisher;
     private final PasswordEncoder passwordEncoder;
-    private final EmailService emailService;
-    private final TemplateEngine templateEngine;
     private final ModelMapper modelMapper;
+    private final PlanRepository planRepository;
+    private final PlanService planService;
 
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
@@ -121,5 +124,14 @@ public class AccountService implements UserDetailsService {
         } // not verified user
 
         publisher.publishEvent(new FindUsernameEvent(account));
+    }
+
+    public AccountWithPlanDto createResponseWithPlan(Account account) {
+        AccountWithPlanDto result = new AccountWithPlanDto();
+        result.setAccount(account);
+        Plan plan  = planRepository.findPlanSoon(account);
+        PlanResponseDto planResponse = planService.createPlanResponse(account, plan);
+        result.setPlanResponseDto(planResponse);
+        return result;
     }
 }

@@ -43,6 +43,18 @@ public class AccountController {
         return ResponseEntity.ok(accountResource);
     }
 
+    @GetMapping("/check")
+    public ResponseEntity checkMyInfo(@CurrentUser Account account) {
+        Optional<Account> target = accountRepository.findById(account.getId());
+        if (target == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        AccountWithPlanDto result = accountService.createResponseWithPlan(target.get());
+        EntityModel<AccountWithPlanDto> returnVal = AccountWithPlanResource.modelOf(result);
+        return ResponseEntity.ok().body(returnVal);
+    }
+
     @GetMapping("/emailVerification")
     public ResponseEntity emailVerification(@CurrentUser Account account, @RequestParam String token){
         Optional<Account> byId = accountRepository.findById(account.getId());
