@@ -76,7 +76,7 @@ class AccountControllerTest {
                 .andExpect(jsonPath("_links.my-published-plans").exists());
     }
     @Test
-    @DisplayName("회원가입 에러")
+    @DisplayName("회원가입 에러- 아이디,이메일 이미 사용중")
     void signUp_wrong() throws Exception {
         Account kiseok = Account.builder()
                 .username("kiseok")
@@ -94,6 +94,22 @@ class AccountControllerTest {
         mockMvc.perform(post("/signUp")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(accountDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("errors").exists());
+    }
+    @Test
+    @DisplayName("회원가입 에러- 패스워드 길이는 8~20 사이")
+    void signUp_wrongPass() throws Exception {
+        AccountDto accountDto = new AccountDto();
+        accountDto.setUsername("kiseok");
+        accountDto.setPassword("12");
+        accountDto.setEmail("kisa0828@naver.com");
+        accountDto.setNickname("hello");
+
+        mockMvc.perform(post("/signUp")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(accountDto)))
+                .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("errors").exists());
     }
@@ -120,8 +136,8 @@ class AccountControllerTest {
     }
 
     @Test
-    @DisplayName("로그인 실패")
-    void login_fail() throws Exception {
+    @DisplayName("로그인 실패 - 비밀번호 틀림")
+    void login_fail_pass() throws Exception {
         Account account = new Account();
         account.setUsername("kiseok");
         account.setEmail("kisa0828@naver.com");
@@ -133,6 +149,25 @@ class AccountControllerTest {
         AccountDto accountDto = new AccountDto();
         accountDto.setUsername("kiseok");
         accountDto.setPassword("12345678");
+
+        mockMvc.perform(post("/login")
+                .content(objectMapper.writeValueAsString(accountDto)))
+                .andExpect(status().isUnauthorized());
+    }
+    @Test
+    @DisplayName("로그인 실패 - id틀림")
+    void login_fail_id() throws Exception {
+        Account account = new Account();
+        account.setUsername("kiseok");
+        account.setEmail("kisa0828@naver.com");
+        account.setPassword(passwordEncoder.encode("123456789"));
+        account.setNickname("hello");
+
+        accountRepository.save(account);
+
+        AccountDto accountDto = new AccountDto();
+        accountDto.setUsername("kiseok1");
+        accountDto.setPassword("123456789");
 
         mockMvc.perform(post("/login")
                 .content(objectMapper.writeValueAsString(accountDto)))

@@ -3,6 +3,7 @@ package buravel.buravel.modules.plan;
 import buravel.buravel.infra.mail.EmailService;
 import buravel.buravel.modules.account.*;
 import buravel.buravel.modules.planTag.PlanTagRepository;
+import buravel.buravel.modules.post.Post;
 import buravel.buravel.modules.post.PostDto;
 import buravel.buravel.modules.post.PostRepository;
 import buravel.buravel.modules.postTag.PostTagRepository;
@@ -113,12 +114,116 @@ class PlanControllerTest {
                 .andDo(print());
 
     }
+    @Test
+    @DisplayName("여행 계획 작성_성공_top3등록")
+    void createPlan_withTop3List() throws Exception {
+        String token = getAccessToken();
+        //login하면서 security context holder에 사용자 인증정보 추가했고
+        mockMvc.perform(post("/plans")
+                .header(HttpHeaders.AUTHORIZATION, token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON)
+                .content(objectMapper.writeValueAsString(createPlanDto())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("id").exists())
+                .andExpect(jsonPath("accountResponseDto").exists())
+                .andExpect(jsonPath("planTagResponseDtos").exists())
+                .andExpect(jsonPath("_links").exists())
+                .andExpect(jsonPath("_links.profile").exists())
+                .andExpect(jsonPath("_links.search").exists())
+                .andExpect(jsonPath("_links.self").exists())
+                .andExpect(jsonPath("_links.updatePlan").exists())
+                .andExpect(jsonPath("_links.deletePlan").exists())
+                .andExpect(jsonPath("_links.getMyClosedPlans").exists())
+                .andExpect(jsonPath("_links.getMyPublishedPlans").exists())
+                .andDo(print());
+
+        Account kiseok = accountRepository.findByUsername("kiseok");
+        List<Plan> allByPlanManager = planRepository.findAllByPlanManager(kiseok);
+        Plan plan = allByPlanManager.get(0);
+        //해당 여행 계획에는 4개의 post가 존재하고 카테고리별 총합 가격은 flight dish shopping  // etc
+        assertThat(plan.getTop3List().contains("FLIGHT")).isTrue();
+        assertThat(plan.getTop3List().contains("DISH")).isTrue();
+        assertThat(plan.getTop3List().contains("SHOPPING")).isTrue();
+    }
+    @Test
+    @DisplayName("여행 계획 작성_성공 / 비공개 여행의 포스트들은 closed ")
+    void createPlan_notPublishedPlansWithClosedPosts() throws Exception {
+        String token = getAccessToken();
+        //login하면서 security context holder에 사용자 인증정보 추가했고
+        mockMvc.perform(post("/plans")
+                .header(HttpHeaders.AUTHORIZATION, token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON)
+                .content(objectMapper.writeValueAsString(createPlanDto())))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        Account kiseok = accountRepository.findByUsername("kiseok");
+        List<Plan> allByPlanManager = planRepository.findAllByPlanManager(kiseok);
+        Plan plan = allByPlanManager.get(0);
+        List<Post> allByPlanOf = postRepository.findAllByPlanOf(plan);
+        for (Post post : allByPlanOf) {
+            assertThat(post.isClosed()).isTrue();
+        }
+    }
+    @Test
+    @DisplayName("여행 계획 작성_성공 / 공개 여행의 포스트들은 notClosed ")
+    void createPlan_PublishedPlansWithNotClosedPosts() throws Exception {
+        String token = getAccessToken();
+        //login하면서 security context holder에 사용자 인증정보 추가했고
+        mockMvc.perform(post("/plans")
+                .header(HttpHeaders.AUTHORIZATION, token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON)
+                .content(objectMapper.writeValueAsString(createPlanDtoWithPublished())))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        Account kiseok = accountRepository.findByUsername("kiseok");
+        List<Plan> allByPlanManager = planRepository.findAllByPlanManager(kiseok);
+        Plan plan = allByPlanManager.get(0);
+        List<Post> allByPlanOf = postRepository.findAllByPlanOf(plan);
+        for (Post post : allByPlanOf) {
+            assertThat(post.isClosed()).isFalse();
+        }
+    }
+    @Test
+    @DisplayName("여행 계획 작성_성공_우선 여행 계획만 저장하고 post는 추가하지 않았다.")
+    void createPlan_withOutPosts() throws Exception {
+        String token = getAccessToken();
+        //login하면서 security context holder에 사용자 인증정보 추가했고
+        mockMvc.perform(post("/plans")
+                .header(HttpHeaders.AUTHORIZATION, token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON)
+                .content(objectMapper.writeValueAsString(createPlanDto_withOutPosts())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("id").exists())
+                .andExpect(jsonPath("accountResponseDto").exists())
+                .andExpect(jsonPath("planTagResponseDtos").exists())
+                .andExpect(jsonPath("_links").exists())
+                .andExpect(jsonPath("_links.profile").exists())
+                .andExpect(jsonPath("_links.search").exists())
+                .andExpect(jsonPath("_links.self").exists())
+                .andExpect(jsonPath("_links.updatePlan").exists())
+                .andExpect(jsonPath("_links.deletePlan").exists())
+                .andExpect(jsonPath("_links.getMyClosedPlans").exists())
+                .andExpect(jsonPath("_links.getMyPublishedPlans").exists())
+                .andDo(print());
+        Account kiseok = accountRepository.findByUsername("kiseok");
+        List<Plan> allByPlanManager = planRepository.findAllByPlanManager(kiseok);
+        Plan plan = allByPlanManager.get(0);
+        assertThat(postRepository.countByPlanOf(plan)).isEqualTo(0);
+
+    }
 
     @Test
     @DisplayName("여행 계획 작성 - 실패(여행 시작날짜가 더 빠를 수 없다.)")
     void createPlan_fail() throws Exception {
         String token = getAccessToken();
         //login하면서 security context holder에 사용자 인증정보 추가했고
+
         mockMvc.perform(post("/plans")
                 .header(HttpHeaders.AUTHORIZATION, token)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -126,6 +231,71 @@ class PlanControllerTest {
                 .content(objectMapper.writeValueAsString(createWrongPlanDto())))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("errors[0].defaultMessage").exists())
+                .andDo(print());
+    }
+    @Test
+    @DisplayName("여행 계획 작성 - 실패(without plan title.)")
+    void createPlan_fail_withoutPlanTitle() throws Exception {
+        String token = getAccessToken();
+        //login하면서 security context holder에 사용자 인증정보 추가했고
+
+        PlanDto planDto = new PlanDto();
+        planDto.setPublished(false);
+        planDto.setStartDate(LocalDate.now());
+        planDto.setEndDate(LocalDate.now().minusDays(1));
+        planDto.setPlanTag("spring,java");
+        planDto.setPostDtos(createPostDtos());
+
+        mockMvc.perform(post("/plans")
+                .header(HttpHeaders.AUTHORIZATION, token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON)
+                .content(objectMapper.writeValueAsString(planDto)))
+                .andExpect(status().isBadRequest())
+                .andDo(print());
+    }
+    @Test
+    @DisplayName("여행 계획 작성 - 실패(without plan startdate.)")
+    void createPlan_fail_withoutPlanStartDate() throws Exception {
+        String token = getAccessToken();
+        //login하면서 security context holder에 사용자 인증정보 추가했고
+
+        Random rand = new Random();
+        PlanDto planDto = new PlanDto();
+        planDto.setPlanTitle(rand.nextInt(100)+"test");
+        planDto.setPublished(false);
+        planDto.setEndDate(LocalDate.now().plusDays(1));
+        planDto.setPlanTag("spring,java");
+        planDto.setPostDtos(createPostDtos());
+
+        mockMvc.perform(post("/plans")
+                .header(HttpHeaders.AUTHORIZATION, token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON)
+                .content(objectMapper.writeValueAsString(planDto)))
+                .andExpect(status().isBadRequest())
+                .andDo(print());
+    }
+    @Test
+    @DisplayName("여행 계획 작성 - 실패(without plan enddate.)")
+    void createPlan_fail_withoutPlanEndDate() throws Exception {
+        String token = getAccessToken();
+        //login하면서 security context holder에 사용자 인증정보 추가했고
+
+        Random rand = new Random();
+        PlanDto planDto = new PlanDto();
+        planDto.setPlanTitle(rand.nextInt(100)+"test");
+        planDto.setPublished(false);
+        planDto.setStartDate(LocalDate.now());
+        planDto.setPlanTag("spring,java");
+        planDto.setPostDtos(createPostDtos());
+
+        mockMvc.perform(post("/plans")
+                .header(HttpHeaders.AUTHORIZATION, token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON)
+                .content(objectMapper.writeValueAsString(planDto)))
+                .andExpect(status().isBadRequest())
                 .andDo(print());
     }
 
@@ -303,6 +473,17 @@ class PlanControllerTest {
         return planDto;
     }
 
+    public PlanDto createPlanDto_withOutPosts() {
+        Random rand = new Random();
+        PlanDto planDto = new PlanDto();
+        planDto.setPlanTitle(rand.nextInt(100)+"test");
+        planDto.setPublished(false);
+        planDto.setStartDate(LocalDate.now());
+        planDto.setEndDate(LocalDate.now().plusDays(1));
+        planDto.setPlanTag("spring,java");
+        return planDto;
+    }
+
     public PlanDto createWrongPlanDto() {
         PlanDto planDto = new PlanDto();
         planDto.setPlanTitle("test");
@@ -319,8 +500,16 @@ class PlanControllerTest {
             for (int j = 0; j < 2; j++) {
                 PostDto postDto = new PostDto();
                 postDto.setPostTitle("posts");
-                postDto.setPrice(i+10000l);
-                postDto.setCategory("ETC");
+                postDto.setPrice(i+j+10000l);
+                if (i == 0 && j == 0) {
+                    postDto.setCategory("ETC");
+                } else if (i == 0 && j == 1) {
+                    postDto.setCategory("FLIGHT");
+                } else if (i == 1 && j == 0) {
+                    postDto.setCategory("DISH");
+                } else {
+                    postDto.setCategory("SHOPPING");
+                }
                 postDto.setRating(4.0f);
                 postDto.setLng(12.345);
                 postDto.setLat(54.321);

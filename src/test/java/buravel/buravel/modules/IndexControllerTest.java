@@ -158,7 +158,7 @@ class IndexControllerTest {
     }
 
     @Test
-    @DisplayName("검색 - 조건 없는 검색은 plan 전체 조회를 대체할 수 있다.")
+    @DisplayName("검색 - 조건 없는 검색은 공개된 plan 전체 조회를 대체할 수 있다.")
     void searchWithoutCond() throws Exception{
         setting();
         mockMvc.perform(get("/index/search")
