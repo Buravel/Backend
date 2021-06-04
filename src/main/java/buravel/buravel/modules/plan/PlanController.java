@@ -39,7 +39,7 @@ public class PlanController {
     private final AccountRepository accountRepository;
 
     @PostMapping
-    public ResponseEntity createPlan(@RequestBody @Valid PlanDto planDto, @CurrentUser Account account, Errors errors) throws NotFoundException {
+    public ResponseEntity createPlan(@RequestBody @Valid PlanDto planDto, @CurrentUser Account account, Errors errors) {
         if (errors.hasErrors()) {
             EntityModel<Errors> jsr303 = ErrorResource.of(errors);
             return ResponseEntity.badRequest().body(jsr303);
@@ -85,11 +85,16 @@ public class PlanController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity getPlan(@PathVariable Long id) throws NotFoundException {
+    public ResponseEntity getPlan(@PathVariable Long id)  {
         if (!planRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
-        EntityModel<PlanWithPostResponseDto> model = planService.getPlanWithPlanId(id);
+        EntityModel<PlanWithPostResponseDto> model = null;
+        try {
+            model = planService.getPlanWithPlanId(id);
+        } catch (NotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
         EntityModel<PlanWithPostResponseDto> result = planService.addLinksWithGetPlan(model);
         return ResponseEntity.ok(result);
     }

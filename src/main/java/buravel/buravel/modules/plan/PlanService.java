@@ -568,7 +568,7 @@ public class PlanService {
         return plans;
     }
 
-    public EntityModel<PlanResponseDto> addLinksWithCreate(EntityModel<PlanResponseDto> resultResource) throws NotFoundException {
+    public EntityModel<PlanResponseDto> addLinksWithCreate(EntityModel<PlanResponseDto> resultResource)  {
         resultResource.add(linkTo(PlanController.class).slash(resultResource.getContent().getId()).withSelfRel());
         resultResource.add(linkTo(PlanController.class).withRel("updatePlan"));
         resultResource.add(linkTo(PlanController.class).slash(resultResource.getContent().getId()).withRel("deletePlan"));
