@@ -50,7 +50,7 @@ public class AccountEventListener {
         context.setVariable("username", account.getUsername());
         context.setVariable("message","Buravel 서비스 사용을 위해 코드를 복사하여 붙여넣어주세요.");
 
-        String message = templateEngine.process("mail/simple-link", context);
+        String message = templateEngine.process("mail/emailAuth_Template", context);
 
         EmailMessage build = EmailMessage.builder()
                 .to(account.getEmail())
@@ -65,7 +65,7 @@ public class AccountEventListener {
         Context context = new Context();
         context.setVariable("username", account.getUsername());
         context.setVariable("message", tempPassword);
-        String message = templateEngine.process("mail/tempPassword", context);
+        String message = templateEngine.process("mail/emailPW_Template", context);
 
         EmailMessage emailMessage = EmailMessage.builder()
                 .subject("Buravel - 임시 비밀번호 발급 안내")
@@ -80,7 +80,7 @@ public class AccountEventListener {
         Context context = new Context();
         context.setVariable("username", account.getUsername());
 
-        String message = templateEngine.process("mail/sendUsername", context);
+        String message = templateEngine.process("mail/emailID_Template", context);
 
         EmailMessage build = EmailMessage.builder()
                 .to(account.getEmail())
