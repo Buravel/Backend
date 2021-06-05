@@ -1,6 +1,7 @@
 package buravel.buravel.modules.plan;
 
 import buravel.buravel.modules.IndexController;
+import buravel.buravel.modules.plan.dtos.PatchPlanResponseDto;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 

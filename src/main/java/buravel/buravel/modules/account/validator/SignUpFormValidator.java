@@ -1,6 +1,6 @@
 package buravel.buravel.modules.account.validator;
 
-import buravel.buravel.modules.account.AccountDto;
+import buravel.buravel.modules.account.dtos.AccountDto;
 import buravel.buravel.modules.account.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

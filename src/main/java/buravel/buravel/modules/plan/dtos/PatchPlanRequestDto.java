@@ -1,6 +1,6 @@
-package buravel.buravel.modules.plan;
+package buravel.buravel.modules.plan.dtos;
 
-import buravel.buravel.modules.post.PostDto;
+import buravel.buravel.modules.post.dtos.PostDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

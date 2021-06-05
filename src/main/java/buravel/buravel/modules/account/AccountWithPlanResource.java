@@ -1,14 +1,13 @@
 package buravel.buravel.modules.account;
 
 import buravel.buravel.modules.IndexController;
-import buravel.buravel.modules.mypage.MypageController;
+import buravel.buravel.modules.account.dtos.AccountWithPlanDto;
 import buravel.buravel.modules.plan.PlanController;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RequiredArgsConstructor
 public class AccountWithPlanResource extends EntityModel<AccountWithPlanDto> {

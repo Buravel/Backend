@@ -1,11 +1,11 @@
 package buravel.buravel.modules.bookmarkPost;
 
 import buravel.buravel.modules.IndexController;
+import buravel.buravel.modules.bookmarkPost.dtos.CheckResponseDto;
 import buravel.buravel.modules.plan.PlanController;
 import org.springframework.hateoas.EntityModel;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 public class CheckResource extends EntityModel<CheckResponseDto> {
 

@@ -1,17 +1,19 @@
 package buravel.buravel.modules.plan;
 
-import buravel.buravel.modules.IndexController;
 import buravel.buravel.modules.account.Account;
 import buravel.buravel.modules.account.AccountRepository;
-import buravel.buravel.modules.account.AccountResponseDto;
-import buravel.buravel.modules.bookmark.BookmarkService;
+import buravel.buravel.modules.account.dtos.AccountResponseDto;
 import buravel.buravel.modules.bookmarkPost.BookmarkPost;
 import buravel.buravel.modules.bookmarkPost.BookmarkPostRepository;
 import buravel.buravel.modules.bookmarkPost.BookmarkPostService;
+import buravel.buravel.modules.plan.dtos.*;
 import buravel.buravel.modules.planTag.PlanTag;
 import buravel.buravel.modules.planTag.PlanTagRepository;
 import buravel.buravel.modules.planTag.PlanTagResponseDto;
 import buravel.buravel.modules.post.*;
+import buravel.buravel.modules.post.dtos.PatchPostReponseDto;
+import buravel.buravel.modules.post.dtos.PostDto;
+import buravel.buravel.modules.post.dtos.PostForPlanResponseDto;
 import buravel.buravel.modules.postTag.PostTag;
 import buravel.buravel.modules.postTag.PostTagRepository;
 import buravel.buravel.modules.postTag.PostTagResponseDto;
@@ -20,8 +22,6 @@ import buravel.buravel.modules.tag.TagRepository;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.CollectionModel;
@@ -31,15 +31,12 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.Convert;
 import java.io.IOException;
-import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Service
 @Transactional

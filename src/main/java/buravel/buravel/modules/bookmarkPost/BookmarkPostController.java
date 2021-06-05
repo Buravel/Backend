@@ -2,6 +2,9 @@ package buravel.buravel.modules.bookmarkPost;
 
 import buravel.buravel.modules.account.Account;
 import buravel.buravel.modules.account.CurrentUser;
+import buravel.buravel.modules.bookmarkPost.dtos.BookmarkPostResponseDto;
+import buravel.buravel.modules.bookmarkPost.dtos.CheckRequestDto;
+import buravel.buravel.modules.bookmarkPost.dtos.CheckResponseDto;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
@@ -11,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 

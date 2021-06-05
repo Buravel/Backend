@@ -1,8 +1,7 @@
 package buravel.buravel.infra.jwt;
 
 import buravel.buravel.modules.account.Account;
-import buravel.buravel.modules.account.AccountDto;
-import buravel.buravel.modules.account.AccountRepository;
+import buravel.buravel.modules.account.dtos.AccountDto;
 import buravel.buravel.modules.account.UserAccount;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -12,8 +11,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.servlet.FilterChain;
@@ -22,7 +19,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Date;
-import java.util.List;
 
 /**
  * 인증필터 // 인증 != 인가(권한부여)

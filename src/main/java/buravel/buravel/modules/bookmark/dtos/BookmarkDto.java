@@ -1,4 +1,4 @@
-package buravel.buravel.modules.bookmark;
+package buravel.buravel.modules.bookmark.dtos;
 
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;

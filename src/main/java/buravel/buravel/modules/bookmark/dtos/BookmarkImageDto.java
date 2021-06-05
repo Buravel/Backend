@@ -1,7 +1,7 @@
-package buravel.buravel.modules.bookmark;
+package buravel.buravel.modules.bookmark.dtos;
 
-import buravel.buravel.modules.account.AccountResponseDto;
-import buravel.buravel.modules.bookmarkPost.BookmarkPostResponseDto;
+import buravel.buravel.modules.account.dtos.AccountResponseDto;
+import buravel.buravel.modules.bookmarkPost.dtos.BookmarkPostResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

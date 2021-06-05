@@ -2,11 +2,11 @@ package buravel.buravel.modules.bookmark;
 
 import buravel.buravel.modules.account.Account;
 import buravel.buravel.modules.account.AccountRepository;
-import buravel.buravel.modules.account.AccountResponseDto;
+import buravel.buravel.modules.account.dtos.AccountResponseDto;
+import buravel.buravel.modules.bookmark.dtos.BookmarkDto;
+import buravel.buravel.modules.bookmark.dtos.BookmarkResponseDto;
 import buravel.buravel.modules.bookmarkPost.BookmarkPost;
 import buravel.buravel.modules.bookmarkPost.BookmarkPostService;
-import buravel.buravel.modules.bookmarkPost.BookmarkPostService;
-import buravel.buravel.modules.plan.Plan;
 import buravel.buravel.modules.post.Post;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -16,12 +16,8 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.ModelMap;
 
-import javax.swing.text.html.Option;
-import java.awt.print.Book;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;

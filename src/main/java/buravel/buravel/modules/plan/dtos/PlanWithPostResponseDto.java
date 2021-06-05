@@ -1,8 +1,8 @@
-package buravel.buravel.modules.plan;
+package buravel.buravel.modules.plan.dtos;
 
-import buravel.buravel.modules.account.AccountResponseDto;
+import buravel.buravel.modules.account.dtos.AccountResponseDto;
 import buravel.buravel.modules.planTag.PlanTagResponseDto;
-import buravel.buravel.modules.post.PostForPlanResponseDto;
+import buravel.buravel.modules.post.dtos.PostForPlanResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

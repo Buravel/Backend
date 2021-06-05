@@ -1,8 +1,6 @@
-package buravel.buravel.modules.post;
+package buravel.buravel.modules.post.dtos;
 
-import buravel.buravel.modules.account.AccountResponseDto;
-import buravel.buravel.modules.bookmarkPost.BookmarkPostResponseDto;
-import buravel.buravel.modules.plan.PlanResponseDto;
+import buravel.buravel.modules.post.PostCategory;
 import buravel.buravel.modules.postTag.PostTagResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,7 +13,14 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostResponseDto {
+public class PostForPlanResponseDto {
+    /**
+     * plan - 여행계획에서 각각의 post정보를 보여줘야한다.
+     * 무엇이 필요한가?
+     * 이 plan의 대한 정보들
+     * + 각각의 post에 대한 정보들 이 때 post의 bookmarkPost필드는 필요가 있는가? x
+     * + post의 account필드가 필요가 있는가 ? x
+     * */
     private Long id;
     private String postTitle;
     private Long price;
@@ -32,9 +37,5 @@ public class PostResponseDto {
     private Integer ordering;
     @Lob
     private String memo;
-    private AccountResponseDto accountResponseDto;
-    private PlanResponseDto planResponseDto;
     private List<PostTagResponseDto> postTagResponseDtoList = new ArrayList<>();
-    private List<BookmarkPostResponseDto> bookmarkPostResponseDtos = new ArrayList<>();
-    //todo 북마크파트에서 북마크 - post 응답용 dto해결해야 가능
 }

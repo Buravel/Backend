@@ -1,4 +1,4 @@
-package buravel.buravel.modules.post;
+package buravel.buravel.modules.post.dtos;
 
 import buravel.buravel.modules.postTag.PostTagResponseDto;
 import lombok.AllArgsConstructor;

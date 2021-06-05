@@ -1,4 +1,4 @@
-package buravel.buravel.modules.account;
+package buravel.buravel.modules.account.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

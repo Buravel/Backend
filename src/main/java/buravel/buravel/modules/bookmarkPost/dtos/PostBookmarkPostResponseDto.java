@@ -1,4 +1,4 @@
-package buravel.buravel.modules.bookmarkPost;
+package buravel.buravel.modules.bookmarkPost.dtos;
 
 import buravel.buravel.modules.post.PostCategory;
 import lombok.AllArgsConstructor;

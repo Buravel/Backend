@@ -1,22 +1,18 @@
 package buravel.buravel.modules.account;
 
-import buravel.buravel.infra.AppProperties;
-import buravel.buravel.infra.mail.EmailMessage;
-import buravel.buravel.infra.mail.EmailService;
+import buravel.buravel.modules.account.dtos.AccountDto;
+import buravel.buravel.modules.account.dtos.AccountResponseDto;
+import buravel.buravel.modules.account.dtos.AccountWithPlanDto;
 import buravel.buravel.modules.account.event.FindUsernameEvent;
 import buravel.buravel.modules.account.event.SignUpConfirmEvent;
 import buravel.buravel.modules.account.event.TempPasswordEvent;
 import buravel.buravel.modules.plan.Plan;
 import buravel.buravel.modules.plan.PlanRepository;
-import buravel.buravel.modules.plan.PlanResponseDto;
+import buravel.buravel.modules.plan.dtos.PlanResponseDto;
 import buravel.buravel.modules.plan.PlanService;
-import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.http.ResponseEntity;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -24,10 +20,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Service

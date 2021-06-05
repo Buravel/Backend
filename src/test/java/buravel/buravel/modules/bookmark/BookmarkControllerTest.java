@@ -2,16 +2,15 @@ package buravel.buravel.modules.bookmark;
 
 
 import buravel.buravel.infra.mail.EmailService;
-import buravel.buravel.modules.account.AccountDto;
+import buravel.buravel.modules.account.dtos.AccountDto;
 import buravel.buravel.modules.account.AccountRepository;
 import buravel.buravel.modules.account.AccountService;
+import buravel.buravel.modules.bookmark.dtos.BookmarkDto;
 import buravel.buravel.modules.bookmarkPost.BookmarkPostRepository;
 import buravel.buravel.modules.plan.PlanRepository;
 import buravel.buravel.modules.plan.PlanService;
 import buravel.buravel.modules.planTag.PlanTagRepository;
 import buravel.buravel.modules.post.PostRepository;
-import buravel.buravel.modules.postTag.PostTagRepository;
-import buravel.buravel.modules.tag.TagRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,7 +29,6 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import javax.transaction.Transactional;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;

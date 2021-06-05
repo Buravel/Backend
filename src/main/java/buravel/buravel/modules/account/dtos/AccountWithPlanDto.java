@@ -1,7 +1,7 @@
-package buravel.buravel.modules.account;
+package buravel.buravel.modules.account.dtos;
 
-import buravel.buravel.modules.plan.Plan;
-import buravel.buravel.modules.plan.PlanResponseDto;
+import buravel.buravel.modules.account.Account;
+import buravel.buravel.modules.plan.dtos.PlanResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

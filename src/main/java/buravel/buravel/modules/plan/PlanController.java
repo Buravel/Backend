@@ -2,9 +2,9 @@ package buravel.buravel.modules.plan;
 
 import buravel.buravel.modules.account.Account;
 import buravel.buravel.modules.account.AccountRepository;
-import buravel.buravel.modules.account.AccountWithPlanDto;
 import buravel.buravel.modules.account.CurrentUser;
 import buravel.buravel.modules.errors.ErrorResource;
+import buravel.buravel.modules.plan.dtos.*;
 import buravel.buravel.modules.plan.validator.PatchPlanValidator;
 import buravel.buravel.modules.plan.validator.PlanValidator;
 import javassist.NotFoundException;
@@ -22,8 +22,6 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-
-import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 

@@ -2,28 +2,20 @@ package buravel.buravel.modules.bookmark;
 
 import buravel.buravel.modules.account.Account;
 import buravel.buravel.modules.account.CurrentUser;
-import buravel.buravel.modules.bookmarkPost.BookmarkPostController;
+import buravel.buravel.modules.bookmark.dtos.BookmarkDto;
+import buravel.buravel.modules.bookmark.dtos.BookmarkResponseDto;
+import buravel.buravel.modules.bookmark.dtos.UserBookmarkDto;
 import buravel.buravel.modules.errors.ErrorResource;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.swing.text.html.parser.Entity;
 import javax.validation.Valid;
 import java.net.URI;
-import java.util.Collection;
-import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
@@ -45,7 +37,7 @@ public class BookmarkController {
     }
 
     @PostMapping
-    public ResponseEntity createBookmark(@RequestBody @Valid BookmarkDto bookmarkDto,@CurrentUser Account account, Errors errors){
+    public ResponseEntity createBookmark(@RequestBody @Valid BookmarkDto bookmarkDto, @CurrentUser Account account, Errors errors){
         if (errors.hasErrors()) {
             EntityModel<Errors> error1 = ErrorResource.modelOf(errors);
             return ResponseEntity.badRequest().body(error1);

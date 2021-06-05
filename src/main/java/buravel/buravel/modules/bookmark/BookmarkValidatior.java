@@ -1,6 +1,8 @@
 package buravel.buravel.modules.bookmark;
 
 import buravel.buravel.modules.account.Account;
+import buravel.buravel.modules.bookmark.dtos.BookmarkDto;
+import buravel.buravel.modules.bookmark.dtos.UserBookmarkDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;

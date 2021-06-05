@@ -1,12 +1,12 @@
 package buravel.buravel.modules.mypage;
 
 import buravel.buravel.modules.IndexController;
+import buravel.buravel.modules.mypage.dtos.UserInfoResponseDto;
 import buravel.buravel.modules.plan.PlanController;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 public class MypageResource extends EntityModel<UserInfoResponseDto> {
 

@@ -1,6 +1,6 @@
 package buravel.buravel.modules.plan.validator;
 
-import buravel.buravel.modules.plan.PlanDto;
+import buravel.buravel.modules.plan.dtos.PlanDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;

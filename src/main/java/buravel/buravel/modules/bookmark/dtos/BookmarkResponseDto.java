@@ -1,7 +1,7 @@
-package buravel.buravel.modules.bookmark;
+package buravel.buravel.modules.bookmark.dtos;
 
-import buravel.buravel.modules.account.AccountResponseDto;
-import buravel.buravel.modules.bookmarkPost.BookmarkPostResponseDto;
+import buravel.buravel.modules.account.dtos.AccountResponseDto;
+import buravel.buravel.modules.bookmarkPost.dtos.BookmarkPostResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,5 +18,4 @@ public class BookmarkResponseDto {
     private AccountResponseDto accountResponseDto;
     private List<BookmarkPostResponseDto> bookmarkPostResponseDtos = new ArrayList<>();
     private List<String> bookmarkImages = new ArrayList<>();
-    //todo 북마크파트에서 어떻게 무함참조 피할지, 필요한게 무엇인지 고민
 }

@@ -1,4 +1,4 @@
-package buravel.buravel.modules.mypage;
+package buravel.buravel.modules.mypage.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

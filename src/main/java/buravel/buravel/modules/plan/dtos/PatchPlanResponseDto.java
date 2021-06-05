@@ -1,7 +1,7 @@
-package buravel.buravel.modules.plan;
+package buravel.buravel.modules.plan.dtos;
 
 import buravel.buravel.modules.planTag.PlanTagResponseDto;
-import buravel.buravel.modules.post.PatchPostReponseDto;
+import buravel.buravel.modules.post.dtos.PatchPostReponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

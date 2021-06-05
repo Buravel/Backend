@@ -1,4 +1,4 @@
-package buravel.buravel.modules.mypage;
+package buravel.buravel.modules.account.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,11 +10,9 @@ import javax.validation.constraints.Email;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserInfoResponseDto {
+public class AccountResponseDto {
     private Long id;
     private String username;
-    private String nickname;
-
     @Lob
     private String profileImage;
     @Email

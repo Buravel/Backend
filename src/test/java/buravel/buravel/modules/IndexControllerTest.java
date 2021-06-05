@@ -1,16 +1,15 @@
 package buravel.buravel.modules;
 
 import buravel.buravel.infra.mail.EmailService;
-import buravel.buravel.modules.account.Account;
-import buravel.buravel.modules.account.AccountDto;
+import buravel.buravel.modules.account.dtos.AccountDto;
 import buravel.buravel.modules.account.AccountRepository;
 import buravel.buravel.modules.account.AccountService;
 import buravel.buravel.modules.plan.Plan;
-import buravel.buravel.modules.plan.PlanDto;
+import buravel.buravel.modules.plan.dtos.PlanDto;
 import buravel.buravel.modules.plan.PlanRepository;
 import buravel.buravel.modules.plan.PlanService;
 import buravel.buravel.modules.planTag.PlanTagRepository;
-import buravel.buravel.modules.post.PostDto;
+import buravel.buravel.modules.post.dtos.PostDto;
 import buravel.buravel.modules.post.PostRepository;
 import buravel.buravel.modules.postTag.PostTagRepository;
 import buravel.buravel.modules.tag.TagRepository;
@@ -34,7 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;

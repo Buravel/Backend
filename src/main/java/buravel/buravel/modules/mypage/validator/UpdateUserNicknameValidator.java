@@ -2,7 +2,7 @@ package buravel.buravel.modules.mypage.validator;
 
 import buravel.buravel.modules.account.Account;
 import buravel.buravel.modules.account.AccountRepository;
-import buravel.buravel.modules.mypage.UserNicknameRequestDto;
+import buravel.buravel.modules.mypage.dtos.UserNicknameRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;

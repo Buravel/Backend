@@ -1,6 +1,7 @@
 package buravel.buravel.modules.bookmark;
 
 import buravel.buravel.modules.IndexController;
+import buravel.buravel.modules.bookmark.dtos.BookmarkResponseDto;
 import org.springframework.hateoas.EntityModel;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;

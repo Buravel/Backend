@@ -1,14 +1,8 @@
-package buravel.buravel.modules.bookmarkPost;
+package buravel.buravel.modules.bookmarkPost.dtos;
 
-import buravel.buravel.modules.bookmark.BookmarkResponseDto;
-import buravel.buravel.modules.plan.PlanResponseDto;
-import buravel.buravel.modules.post.PostCategory;
-import buravel.buravel.modules.post.PostResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.persistence.Lob;
 
 @Data
 @NoArgsConstructor
