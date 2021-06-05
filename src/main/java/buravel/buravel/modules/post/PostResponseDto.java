@@ -26,7 +26,8 @@ public class PostResponseDto {
     private Float rating;
     private boolean closed;
     private Double lat;
-    private Double log;
+    private Double lng;
+    private String location;
     private Integer day;
     private Integer ordering;
     @Lob

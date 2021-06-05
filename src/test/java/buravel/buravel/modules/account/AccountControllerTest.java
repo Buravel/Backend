@@ -76,7 +76,7 @@ class AccountControllerTest {
                 .andExpect(jsonPath("_links.my-published-plans").exists());
     }
     @Test
-    @DisplayName("회원가입 에러")
+    @DisplayName("회원가입 에러- 아이디,이메일 이미 사용중")
     void signUp_wrong() throws Exception {
         Account kiseok = Account.builder()
                 .username("kiseok")
@@ -94,6 +94,22 @@ class AccountControllerTest {
         mockMvc.perform(post("/signUp")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(accountDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("errors").exists());
+    }
+    @Test
+    @DisplayName("회원가입 에러- 패스워드 길이는 8~20 사이")
+    void signUp_wrongPass() throws Exception {
+        AccountDto accountDto = new AccountDto();
+        accountDto.setUsername("kiseok");
+        accountDto.setPassword("12");
+        accountDto.setEmail("kisa0828@naver.com");
+        accountDto.setNickname("hello");
+
+        mockMvc.perform(post("/signUp")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(accountDto)))
+                .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("errors").exists());
     }
@@ -120,8 +136,8 @@ class AccountControllerTest {
     }
 
     @Test
-    @DisplayName("로그인 실패")
-    void login_fail() throws Exception {
+    @DisplayName("로그인 실패 - 비밀번호 틀림")
+    void login_fail_pass() throws Exception {
         Account account = new Account();
         account.setUsername("kiseok");
         account.setEmail("kisa0828@naver.com");
@@ -138,6 +154,25 @@ class AccountControllerTest {
                 .content(objectMapper.writeValueAsString(accountDto)))
                 .andExpect(status().isUnauthorized());
     }
+    @Test
+    @DisplayName("로그인 실패 - id틀림")
+    void login_fail_id() throws Exception {
+        Account account = new Account();
+        account.setUsername("kiseok");
+        account.setEmail("kisa0828@naver.com");
+        account.setPassword(passwordEncoder.encode("123456789"));
+        account.setNickname("hello");
+
+        accountRepository.save(account);
+
+        AccountDto accountDto = new AccountDto();
+        accountDto.setUsername("kiseok1");
+        accountDto.setPassword("123456789");
+
+        mockMvc.perform(post("/login")
+                .content(objectMapper.writeValueAsString(accountDto)))
+                .andExpect(status().isUnauthorized());
+    }
 
     @Test
     @DisplayName("임시 비밀번호 발급")
@@ -149,10 +184,10 @@ class AccountControllerTest {
         accountDto.setNickname("hello");
         Account account = accountService.processNewAccount(accountDto);
         account.setEmailVerified(true);
-
-
+        EmailDto emailDto = new EmailDto();
+        emailDto.setEmail("kisa0828@naver.com");
         mockMvc.perform(post("/tempPassword")
-                .param("email", "kisa0828@naver.com"));
+                .content(objectMapper.writeValueAsString(emailDto)));
         Account user = accountRepository.findByEmail("kisa0828@naver.com");
         assertThat(user.getPassword().matches("123456789")).isFalse();
 
@@ -167,16 +202,21 @@ class AccountControllerTest {
         accountDto.setNickname("hello");
         Account account = accountService.processNewAccount(accountDto);
         account.setEmailVerified(false);
-
+        EmailDto emailDto = new EmailDto();
+        emailDto.setEmail("kisa0828@naver.com");
         mockMvc.perform(post("/tempPassword")
-                .param("email", "kisa0828@naver.com"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(emailDto)))
                 .andExpect(status().isForbidden());
     }
     @Test
     @DisplayName("임시 비밀번호 발급 에러 - 회원 가입된 이메일만 사용가능")
     void getTempPassword_wrong_withoutSignUp() throws Exception {
+        EmailDto emailDto = new EmailDto();
+        emailDto.setEmail("hello@naver.com");
         mockMvc.perform(post("/tempPassword")
-                .param("email", "hello@naver.com"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(emailDto)))
                 .andExpect(status().isNotFound());
     }
 
@@ -186,7 +226,7 @@ class AccountControllerTest {
         String token = getAccessToken();
         Account user = accountRepository.findByUsername("kiseok");
         String emailCheckToken = user.getEmailCheckToken();
-        mockMvc.perform(post("/emailVerification")
+        mockMvc.perform(get("/emailVerification")
                 .header(HttpHeaders.AUTHORIZATION, token)
                 .param("token", emailCheckToken))
                 .andExpect(status().isOk());
@@ -199,7 +239,7 @@ class AccountControllerTest {
         String token = getAccessToken();
         Account user = accountRepository.findByUsername("kiseok");
         String emailCheckToken = user.getEmailCheckToken();
-        mockMvc.perform(post("/emailVerification")
+        mockMvc.perform(get("/emailVerification")
                 .header(HttpHeaders.AUTHORIZATION, token)
                 .param("token", emailCheckToken+"error"))
                 .andDo(print())

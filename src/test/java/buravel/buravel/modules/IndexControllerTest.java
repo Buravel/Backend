@@ -158,7 +158,7 @@ class IndexControllerTest {
     }
 
     @Test
-    @DisplayName("검색 - 조건 없는 검색은 plan 전체 조회를 대체할 수 있다.")
+    @DisplayName("검색 - 조건 없는 검색은 공개된 plan 전체 조회를 대체할 수 있다.")
     void searchWithoutCond() throws Exception{
         setting();
         mockMvc.perform(get("/index/search")
@@ -224,8 +224,9 @@ class IndexControllerTest {
                 postDto.setPrice(i+10000l);
                 postDto.setCategory("ETC");
                 postDto.setRating(4.0f);
-                postDto.setLog(12.345);
+                postDto.setLng(12.345);
                 postDto.setLat(54.321);
+                postDto.setLocation("우리집");
                 postDto.setTags("posts,tag");
                 postDtos[i][j] = postDto;
             }

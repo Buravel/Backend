@@ -19,7 +19,8 @@ public class PatchPostReponseDto {
     private String category;
     private Float rating;
     private Double lat;
-    private Double log;
+    private Double lng;
+    private String location;
     @Lob
     private String memo;
     private List<PostTagResponseDto> postTagList = new ArrayList<>();

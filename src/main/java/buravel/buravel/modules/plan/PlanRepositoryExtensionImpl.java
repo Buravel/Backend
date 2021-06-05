@@ -1,5 +1,6 @@
 package buravel.buravel.modules.plan;
 
+import buravel.buravel.modules.account.Account;
 import buravel.buravel.modules.account.QAccount;
 import buravel.buravel.modules.planTag.QPlanTag;
 import buravel.buravel.modules.tag.QTag;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static buravel.buravel.modules.account.QAccount.account;
@@ -57,5 +59,24 @@ public class PlanRepositoryExtensionImpl extends QuerydslRepositorySupport imple
         JPQLQuery<Plan> planQuery = getQuerydsl().applyPagination(pageable, queryWithPrice);
         QueryResults<Plan> result = planQuery.fetchResults();
         return new PageImpl<>(result.getResults(), pageable, result.getTotal());
+    }
+
+    @Override
+    public Plan findPlanSoon(Account target) {
+        QueryResults<Plan> planQueryResults = from(plan)
+                .where(plan.startDate.after(LocalDate.now())
+                .and(plan.planManager.eq(target)))
+                .leftJoin(plan.planManager, account).fetchJoin()
+                .leftJoin(plan.planTagList, planTag).fetchJoin()
+                .leftJoin(planTag.tag, tag).fetchJoin()
+                .innerJoin(plan.top3List).fetchJoin()
+                .distinct()
+                .fetchResults();
+        List<Plan> results = planQueryResults.getResults();
+        if (results.isEmpty()) {
+            return null;
+        }
+        Plan plan = results.get(0);
+        return plan;
     }
 }

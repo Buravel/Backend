@@ -1,6 +1,8 @@
 package buravel.buravel.modules.plan;
 
 import buravel.buravel.modules.account.Account;
+import buravel.buravel.modules.account.AccountRepository;
+import buravel.buravel.modules.account.AccountWithPlanDto;
 import buravel.buravel.modules.account.CurrentUser;
 import buravel.buravel.modules.errors.ErrorResource;
 import buravel.buravel.modules.plan.validator.PatchPlanValidator;
@@ -21,6 +23,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
+import java.util.Optional;
+
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @RestController
@@ -32,9 +36,10 @@ public class PlanController {
     private final PlanValidator planValidator;
     private final PatchPlanValidator patchPlanValidator;
     private final PlanRepository planRepository;
+    private final AccountRepository accountRepository;
 
     @PostMapping
-    public ResponseEntity createPlan(@RequestBody @Valid PlanDto planDto, @CurrentUser Account account, Errors errors) throws NotFoundException {
+    public ResponseEntity createPlan(@RequestBody @Valid PlanDto planDto, @CurrentUser Account account, Errors errors) {
         if (errors.hasErrors()) {
             EntityModel<Errors> jsr303 = ErrorResource.of(errors);
             return ResponseEntity.badRequest().body(jsr303);
@@ -80,11 +85,16 @@ public class PlanController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity getPlan(@PathVariable Long id) throws NotFoundException {
+    public ResponseEntity getPlan(@PathVariable Long id)  {
         if (!planRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
-        EntityModel<PlanWithPostResponseDto> model = planService.getPlanWithPlanId(id);
+        EntityModel<PlanWithPostResponseDto> model = null;
+        try {
+            model = planService.getPlanWithPlanId(id);
+        } catch (NotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
         EntityModel<PlanWithPostResponseDto> result = planService.addLinksWithGetPlan(model);
         return ResponseEntity.ok(result);
     }
@@ -122,27 +132,4 @@ public class PlanController {
     }
 }
 
-  /*
-  * {
-     "planTitle":"blue",
-     "published":"true",
-     "startDate":"2021-05-02",
-     "endDate":"2021-05-03",
-     "planTag":"swiss,itlay",
-     "postDtos":
-     [
-         [
-          {"postTitle":"first","price":"10000","postImage":"image","category":"FLIGHT","rating":"4.5","lat":"12.12","log":"21.21","tags":"spring,hello"},
-          {"postTitle":"secocnd","price":"20000","category":"DISH","rating":"4.5","lat":"12.12","log":"21.21","tags":"spring,hello"}
-         ],
-         [
-          {"postTitle":"third","price":"30000","postImage":"222","category":"ETC","rating":"4.5","lat":"12.12","log":"21.21","tags":"spring,hello"},
-          {"postTitle":"forth","price":"40000","category":"HOTEL","rating":"4.5","lat":"12.12","log":"21.21","tags":"spring,hello"}
-         ],
-         [
-          {"postTitle":"fifth","price":"10000","category":"SHOPPING","rating":"4.5","lat":"12.12","log":"21.21","tags":"spring,hello"},
-          {"postTitle":"sixth","price":"20000","category":"TRAFFIC","rating":"4.5","lat":"12.12","log":"21.21","tags":"spring,hello"}
-         ]
-     ]
-  }
-  * */
+

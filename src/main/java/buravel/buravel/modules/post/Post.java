@@ -57,7 +57,10 @@ public class Post {
     private Double lat;
 
     @Column(nullable = false)
-    private Double log;
+    private Double lng;
+
+    @Column(nullable = false)
+    private String location;
 
     /**
      * 일자별 + 순서별

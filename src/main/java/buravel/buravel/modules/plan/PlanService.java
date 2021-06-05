@@ -61,6 +61,9 @@ public class PlanService {
 
         Plan plan = generatePlan(planDto, user);
         PostDto[][] postDtos = planDto.getPostDtos();
+        if (postDtos == null) {
+            return plan;
+        }
         generatePosts(plan,postDtos,user);
         settingOutputPlanTotalPrice(plan);
         settingPlanRating(plan);
@@ -78,33 +81,44 @@ public class PlanService {
     }
 
     private void settingTop3ListOfPlan(Plan plan) {
-        HashMap<Long, String> map = new HashMap<>();
+        // 가격을 키 값으로 하면 중복경우가 많이 발생한다. 위험
+        HashMap<String,Long> map = new HashMap<>();
         if (plan.getFlightTotalPrice() > 0) {
-            map.put(plan.getFlightTotalPrice(), "FLIGHT");
+            map.put("FLIGHT",plan.getFlightTotalPrice());
         }
         if (plan.getDishTotalPrice() > 0) {
-            map.put(plan.getDishTotalPrice(), "DISH");
+            map.put("DISH",plan.getDishTotalPrice());
         }
         if (plan.getShoppingTotalPrice() > 0) {
-            map.put(plan.getShoppingTotalPrice(), "SHOPPING");
+            map.put("SHOPPING",plan.getShoppingTotalPrice());
         }
         if (plan.getHotelTotalPrice() > 0) {
-            map.put(plan.getHotelTotalPrice(), "HOTEL");
+            map.put("HOTEL",plan.getHotelTotalPrice());
         }
         if (plan.getTrafficTotalPrice() > 0) {
-            map.put(plan.getTrafficTotalPrice(), "TRAFFIC");
+            map.put("TRAFFIC",plan.getTrafficTotalPrice());
         }
         if (plan.getEtcTotalPrice() > 0) {
-            map.put(plan.getEtcTotalPrice(), "ETC");
+            map.put("ETC",plan.getEtcTotalPrice());
         }
-        Object[] objects = map.keySet().toArray();
-        Arrays.sort(objects);
-        for (int i = objects.length - 1; i >= 0; i--) {
-            if (plan.getTop3List().size() == 3) {
+        Object[] objects = map.values().toArray();
+        Arrays.sort(objects,Collections.reverseOrder());
+        List<Long> target = new ArrayList<>();
+        for (Object value : objects) {
+            target.add((Long)value);
+            if (target.size() >= 3) {
                 break;
             }
-            plan.getTop3List().add(map.get(objects[i]));
         }
+
+        for (Long aLong : target) {
+            for (String keyset : map.keySet()) {
+                if (map.get(keyset) == aLong) {
+                    plan.getTop3List().add(keyset);
+                }
+            }
+        }
+
     }
 
     private void settingOutputPlanTotalPrice(Plan plan) {
@@ -138,7 +152,8 @@ public class PlanService {
                 post.setRating(postDto.getRating());
                 plan.setPlanRating(plan.getPlanRating()+ postDto.getRating());
                 post.setLat(postDto.getLat());
-                post.setLog(postDto.getLog());
+                post.setLng(postDto.getLng());
+                post.setLocation(postDto.getLocation());
                 post.setDay(i);
                 post.setOrdering(j);
                 post.setMemo(postDto.getMemo());
@@ -553,7 +568,7 @@ public class PlanService {
         return plans;
     }
 
-    public EntityModel<PlanResponseDto> addLinksWithCreate(EntityModel<PlanResponseDto> resultResource) throws NotFoundException {
+    public EntityModel<PlanResponseDto> addLinksWithCreate(EntityModel<PlanResponseDto> resultResource)  {
         resultResource.add(linkTo(PlanController.class).slash(resultResource.getContent().getId()).withSelfRel());
         resultResource.add(linkTo(PlanController.class).withRel("updatePlan"));
         resultResource.add(linkTo(PlanController.class).slash(resultResource.getContent().getId()).withRel("deletePlan"));

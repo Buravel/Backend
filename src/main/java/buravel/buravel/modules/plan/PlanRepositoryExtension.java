@@ -1,5 +1,6 @@
 package buravel.buravel.modules.plan;
 
+import buravel.buravel.modules.account.Account;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -13,4 +14,5 @@ public interface PlanRepositoryExtension {
 
     Page<Plan> findWithSearchCondContainsPrice(String keyword, long min, long max, Pageable pageable);
 
+    Plan findPlanSoon(Account account);
 }
