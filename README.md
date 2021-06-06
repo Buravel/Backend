@@ -13,8 +13,8 @@
 ![buravel](https://user-images.githubusercontent.com/62732789/120909200-99fbf400-c6ad-11eb-83c4-db96b8ce881a.png)
 
 ### 백엔드 팀원 및 담당 파트
-- 김근우 & https://github.com/gwkim9288
-- 김은수 & https://github.com/eunsoo999
-- 남기석 & https://github.com/skarltjr
-- 이예은 & https://github.com/RulLu16
+- 김근우 & [Github](https://github.com/gwkim9288)
+- 김은수 & [Github](https://github.com/eunsoo999)
+- 남기석 & [Github](https://github.com/skarltjr)
+- 이예은 & [Github](https://github.com/RulLu16)
 - https://docs.google.com/spreadsheets/d/1XmJZD9VyPquyhDm9XyfJL_KO89xLlN5-VTQGh6MTW-g/edit#gid=0
