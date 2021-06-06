@@ -430,6 +430,7 @@ public class PlanService {
         // Plan 총 가격/탑3 등 저장
         settingOutputPlanTotalPrice(plan);
         settingTop3ListOfPlan(plan);
+        settingPlanRating(plan);
 
         return plan;
     }
@@ -493,6 +494,7 @@ public class PlanService {
         plan.setHotelTotalPrice(0L);
         plan.setTrafficTotalPrice(0L);
         plan.setEtcTotalPrice(0L);
+        plan.setPlanRating(0F);
 
         // 플랜태그 저장
         String planTag = patchplanRequestDto.getPlanTag();
