@@ -17,4 +17,4 @@
 - 김은수 & [Github](https://github.com/eunsoo999)
 - 남기석 & [Github](https://github.com/skarltjr)
 - 이예은 & [Github](https://github.com/RulLu16)
-- https://docs.google.com/spreadsheets/d/1XmJZD9VyPquyhDm9XyfJL_KO89xLlN5-VTQGh6MTW-g/edit#gid=0
+- [담당파트](https://docs.google.com/spreadsheets/d/1XmJZD9VyPquyhDm9XyfJL_KO89xLlN5-VTQGh6MTW-g/edit#gid=0)
