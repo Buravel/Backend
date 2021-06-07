@@ -9,8 +9,12 @@ import buravel.buravel.modules.bookmarkPost.dtos.CheckResponseDto;
 import buravel.buravel.modules.bookmarkPost.dtos.PostBookmarkPostResponseDto;
 import buravel.buravel.modules.plan.Plan;
 import buravel.buravel.modules.plan.PlanRepository;
+import buravel.buravel.modules.planTag.PlanTag;
+import buravel.buravel.modules.planTag.PlanTagResponseDto;
 import buravel.buravel.modules.post.Post;
 import buravel.buravel.modules.post.PostRepository;
+import buravel.buravel.modules.postTag.PostTag;
+import buravel.buravel.modules.postTag.PostTagResponseDto;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -76,6 +80,15 @@ public class BookmarkPostService {
 
         dto.setOriginPost_id(post.getId());
         dto.setOriginPlan_id(post.getPlanOf().getId());
+
+        List<PostTagResponseDto> tagList = new ArrayList<>();
+        for(PostTag tag : post.getPostTagList()){
+            PostTagResponseDto tagDto = new PostTagResponseDto();
+            tagDto.setPostTagTitle(tag.getTag().getTagTitle());
+            tagList.add(tagDto);
+        }
+        dto.setPostTagResponseDtoList(tagList);
+
         return dto;
     }
 

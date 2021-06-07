@@ -1,11 +1,14 @@
 package buravel.buravel.modules.bookmarkPost.dtos;
 
 import buravel.buravel.modules.post.PostCategory;
+import buravel.buravel.modules.postTag.PostTagResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Lob;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -26,6 +29,7 @@ public class PostBookmarkPostResponseDto {
     private String location;
     @Lob
     private String memo;
+    private List<PostTagResponseDto> postTagResponseDtoList = new ArrayList<>();
     // 원조 plan id
     private Long originPlan_id;
 }
