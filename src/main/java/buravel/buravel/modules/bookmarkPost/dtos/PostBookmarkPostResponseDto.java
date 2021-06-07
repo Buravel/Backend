@@ -11,7 +11,6 @@ import javax.persistence.Lob;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostBookmarkPostResponseDto {
- // todo: 이름이 너무 긴데..
     // 원조 post 정보
     private Long originPost_id;
     private String postTitle;
@@ -23,8 +22,10 @@ public class PostBookmarkPostResponseDto {
     private Float rating;
     private boolean closed;
     private Double lat;
-    private Double log;
+    private Double lng;
+    private String location;
     @Lob
     private String memo;
+    // 원조 plan id
     private Long originPlan_id;
 }
