@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import javax.persistence.Lob;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -18,6 +19,7 @@ public class PatchPlanRequestDto {
     private Long planId;
     @NotBlank
     private String planTitle;
+    @Lob
     private String planImage;
     @NotNull
     private boolean published;
