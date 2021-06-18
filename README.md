@@ -21,6 +21,7 @@
 |😊이예은|[Github](https://github.com/RulLu16)|
 
 - [담당파트](https://docs.google.com/spreadsheets/d/1XmJZD9VyPquyhDm9XyfJL_KO89xLlN5-VTQGh6MTW-g/edit#gid=0)  
+- [프론트](https://github.com/Buravel/Front)
  
 ## 주요 페이지
 ### 메인 화면
